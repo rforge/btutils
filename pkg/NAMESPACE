@@ -1,0 +1,7 @@
+useDynLib(btutils)
+
+export(process.trade)
+export(process.trades)
+export(trades.from.signal)
+export(simple.trade.signal)
+export(get.returns)
