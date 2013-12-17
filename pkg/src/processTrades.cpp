@@ -20,9 +20,11 @@ inline bool isNA(double d) { return R_IsNA(d); }
 #define STOP_TRAILING_ON_OPEN    4
 #define STOP_TRAILING_ON_HIGH    5
 #define STOP_TRAILING_ON_LOW     6
-#define PROFIT_TARGET_ON_OPEN    7
-#define PROFIT_TARGET_ON_HIGH    8
-#define PROFIT_TARGET_ON_LOW     9
+#define STOP_TRAILING_ON_CLOSE   7
+#define PROFIT_TARGET_ON_OPEN    8
+#define PROFIT_TARGET_ON_HIGH    9
+#define PROFIT_TARGET_ON_LOW    10
+#define MAX_DAYS_LIMIT          11
 
 void debugMessageFunc(const char * str)
 {
@@ -34,7 +36,7 @@ void debugMessageFunc(const char * str)
    }
 }
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_MSG(ss) debugMessageFunc((ss))
@@ -54,6 +56,7 @@ void processTrade(
          double stopLoss,
          double stopTrailing,
          double profitTarget,
+         int maxDays,
          int & exitIndex,
          double & exitPrice,
          int & exitReason,
@@ -112,19 +115,41 @@ void processTrade(
                if(op[ii] > maxPrice) maxPrice = op[ii];
 
                break;
-            } else if(hi[ii] > stopPrice) {
+            } 
+            
+            // No exit at the open, chech whether we need to update the trailing stop
+            if(op[ii] < minPrice) {
+               minPrice = op[ii];
+               stopPrice = minPrice*(1.0 + std::abs(stopTrailing));
+            }
+
+            // Next check the high
+            if(hi[ii] > stopPrice) {
                exitPrice = stopPrice;
                exitReason = STOP_TRAILING_ON_HIGH;
                
-               // Update min and max price
-               if(lo[ii] < minPrice) minPrice = lo[ii];
+               // Update max price. We are making the assumption that the high happened
+               // before the low. Thus, we don't need to update the min price.
                if(stopPrice > maxPrice) maxPrice = stopPrice;
 
                break;
-            } else if(lo[ii] < minPrice) {
-               // Update the stop
+            }
+            
+            // Before handling the close, update the stop if necessary
+            if(lo[ii] < minPrice) {
                minPrice = lo[ii];
-               stopPrice = minPrice*(1.0 + std::abs(stopTrailing));
+               stopPrice = minPrice*(1.0 - std::abs(stopTrailing));
+            }
+            
+            // Check the close
+            if(cl[ii] > stopPrice) {
+               exitPrice = stopPrice;
+               exitReason = STOP_TRAILING_ON_CLOSE;
+               
+               // Update max price, min price is already up-to-date (the preivous if-statement)
+               if(stopPrice > maxPrice) maxPrice = stopPrice;
+               
+               break;
             }
          } else if(hasStopLoss) {
             if(op[ii] > stopPrice ) {
@@ -174,8 +199,16 @@ void processTrade(
          // Update min and max price
          if(lo[ii] < minPrice) minPrice = lo[ii];
          if(hi[ii] > maxPrice) maxPrice = hi[ii];
-      }
 
+         // Maximum days for the trade reached
+         if(maxDays > 0 && (ii - ibeg) == maxDays) {
+            exitPrice = cl[ii];
+            exitReason = MAX_DAYS_LIMIT;
+            
+            break;
+         }
+      }
+      
       if(ii > iend) {
          exitPrice = cl[iend];
          exitReason = EXIT_ON_LAST;
@@ -205,10 +238,10 @@ void processTrade(
          hasProfitTarget = true;
          targetPrice = entryPrice*(1.0 + std::abs(profitTarget));
       }
-
+      
       for(ii = ibeg + 1; ii <= iend; ++ii) {
          if(hasStopTrailing) {
-            if(op[ii] < stopPrice ) {
+            if(op[ii] < stopPrice) {
                exitPrice = op[ii];
                exitReason = STOP_TRAILING_ON_OPEN;
 
@@ -217,19 +250,43 @@ void processTrade(
                if(op[ii] > maxPrice) maxPrice = op[ii];
 
                break;
-            } else if(lo[ii] < stopPrice) {
+            }
+
+            // No exit on the open. Check whether we need to update
+            // the trailing stop taking the open into account.
+            if(op[ii] > maxPrice) {
+               maxPrice = op[ii];
+               stopPrice = maxPrice * (1.0 - std::abs(stopTrailing));
+            }
+
+            // Next check the low
+            if(lo[ii] < stopPrice) {
                exitPrice = stopPrice;
                exitReason = STOP_TRAILING_ON_LOW;
                
-               // Update min and max price
+               // Update min price. We are making the assumption that the low happened
+               // before the high. Thus, we don't need to update the max price.
                if(stopPrice < minPrice) minPrice = stopPrice;
-               if(hi[ii] > maxPrice) maxPrice = hi[ii];
 
                break;
-            } else if(lo[ii] < minPrice) {
-               // Update the stop
-               minPrice = lo[ii];
-               stopPrice = minPrice*(1.0 + std::abs(stopTrailing));
+               
+            }
+
+            // Before handling the close, update the stop if necessary
+            if(hi[ii] > maxPrice) {
+               maxPrice = hi[ii];
+               stopPrice = maxPrice*(1.0 - std::abs(stopTrailing));
+            }
+            
+            // Check the close
+            if(cl[ii] < stopPrice) {
+               exitPrice = stopPrice;
+               exitReason = STOP_TRAILING_ON_CLOSE;
+               
+               // Update min price, max price is already up-to-date (the preivous if-statement)
+               if(stopPrice < minPrice) minPrice = stopPrice;
+               
+               break;
             }
          } else if(hasStopLoss) {
             if(op[ii] < stopPrice ) {
@@ -278,6 +335,14 @@ void processTrade(
          // Update min and max price
          if(lo[ii] < minPrice) minPrice = lo[ii];
          if(hi[ii] > maxPrice) maxPrice = hi[ii];
+         
+         // Maximum days for the trade reached
+         if(maxDays > 0 && (ii - ibeg) == maxDays) {
+            exitPrice = cl[ii];
+            exitReason = MAX_DAYS_LIMIT;
+            
+            break;
+         }
       }
 
       if(ii > iend) {
@@ -313,7 +378,8 @@ Rcpp::List processTradeInterface(
                int pos,
                double stopLoss,
                double stopTrailing,
-               double profitTarget)
+               double profitTarget,
+               int maxDays)
 {
    std::vector<double> op = Rcpp::as< std::vector<double> >(opIn);
    std::vector<double> hi = Rcpp::as< std::vector<double> >(hiIn);
@@ -328,14 +394,17 @@ Rcpp::List processTradeInterface(
    // Call the actuall function to do the work. ibeg and iend are 0 based in cpp and 1 based in R.
    processTrade(
       op, hi, lo, cl,
-      ibeg-1, iend-1, pos, stopLoss, stopTrailing, profitTarget,
+      ibeg-1, iend-1, pos, stopLoss, stopTrailing, profitTarget, maxDays,
       exitIndex, exitPrice, exitReason, gain, mae, mfe);
    
    // Build and return the result
    return Rcpp::List::create(
                         Rcpp::Named("exit.index") = exitIndex+1,
                         Rcpp::Named("exit.price") = exitPrice,
-                        Rcpp::Named("exit.reason") = exitReason);
+                        Rcpp::Named("exit.reason") = exitReason,
+                        Rcpp::Named("gain") = gain,
+                        Rcpp::Named("mae") = mae,
+                        Rcpp::Named("mfe") = mfe);
 }
 
 void processTrades(
@@ -349,6 +418,7 @@ void processTrades(
          const std::vector<double> & stopLoss,
          const std::vector<double> & stopTrailing,
          const std::vector<double> & profitTarget,
+         const std::vector<int> & maxDays,
          std::vector<int> & iendOut,
          std::vector<double> & exitPriceOut,
          std::vector<double> & gainOut,
@@ -389,7 +459,7 @@ void processTrades(
       char buf[4096];
       processTrade(
             op, hi, lo, cl,
-            ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii],
+            ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii], maxDays[ii],
             exitIndex, exitPrice, exitReason, gain, mae, mfe);
       snprintf(buf, sizeof(buf), "%d: exitIndex = %d, exitPrice = %f, exitReason = %d, gain = %f, mae = %f, mfe = %f", 
                ii, exitIndex, exitPrice, exitReason, gain, mae, mfe);
@@ -413,7 +483,8 @@ Rcpp::List processTradesInterface(
                      SEXP positionIn,
                      SEXP stopLossIn,
                      SEXP stopTrailingIn,
-                     SEXP profitTargetIn)
+                     SEXP profitTargetIn,
+                     SEXP maxDaysIn)
 {
    DEBUG_MSG("processTradesInterface: entered");
    std::vector<int> ibeg = Rcpp::as< std::vector<int> >( ibegsIn );
@@ -422,6 +493,7 @@ Rcpp::List processTradesInterface(
    std::vector<double> stopLoss = Rcpp::as< std::vector<double> >( stopLossIn );
    std::vector<double> stopTrailing = Rcpp::as< std::vector<double> >( stopTrailingIn );
    std::vector<double> profitTarget = Rcpp::as< std::vector<double> >( profitTargetIn );
+   std::vector<int> maxDays  = Rcpp::as< std::vector<int> >( maxDaysIn );
 
    // Convert ohlc into std vectors
    Rcpp::NumericMatrix ohlcMatrix(ohlcIn);
@@ -468,7 +540,7 @@ Rcpp::List processTradesInterface(
    // Call the c++ function doing the actual work
    processTrades(
          op, hi, lo, cl,
-         ibeg, iend, position, stopLoss, stopTrailing, profitTarget,
+         ibeg, iend, position, stopLoss, stopTrailing, profitTarget, maxDays,
          iendOut, exitPrice, gain, mae, mfe, reason);
 
    /* Just some values for testing
