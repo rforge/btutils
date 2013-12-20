@@ -1,3 +1,6 @@
+require(quantmod)
+require(RUnit)
+
 load("unitTests/drm.RData")
 
 test.process.trade = function() {
@@ -45,7 +48,7 @@ test.process.trade = function() {
    # 0 - exit on the last day
    checkEqualsNumeric(0, df$exit.reason, "010: Bad exit.reason", tolerance=0)
    
-   # Add a trailing stop loss which is  hit
+   # Add a trailing stop loss which is hit
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, 0.05)
 
    # 6 - stop trailing on low
@@ -56,10 +59,37 @@ test.process.trade = function() {
    checkEqualsNumeric(-0.0067, round(df$mae, 4), "015: Bad mae")
    checkEqualsNumeric(0.04553, round(df$mfe, 5), "016: Bad mfe")
    
-#    print(df$exit.reason)
-#    print(df$exit.index)
-#    print(df$exit.price)
-#    print(df$gain)
-#    print(df$mae)
-#    print(df$mfe)
+   # Add a profit target which is not hit
+   df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, NA, 0.1)
+   
+   checkEqualsNumeric(0, df$exit.reason, "017: Bad exit.reason", tolerance=0)
+   
+   # Add a profit target which is hit
+   df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, NA, 0.04)
+   
+   # Profit target on High
+   checkEqualsNumeric(9, df$exit.reason, "018: Bad exit.reason", tolerance=0)
+   checkEqualsNumeric(5198, df$exit.index, "019: Bad exit.index", tolerance=0)
+   checkEqualsNumeric(172.6816, df$exit.price, "020: Bad exit.price", tolerance=0.001)
+   checkEqualsNumeric(0.04, round(df$gain, 4), "021: Bad gain")
+   checkEqualsNumeric(0, round(df$mae, 4), "022: Bad mae")
+   checkEqualsNumeric(0.04, round(df$mfe, 5), "023: Bad mfe")
+   
+   # Same profit target together with a trailing stop
+   df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, 0.05, 0.04)
+   
+   print(df$exit.reason)
+   print(df$exit.index)
+   print(df$exit.price)
+   print(df$gain)
+   print(df$mae)
+   print(df$mfe)
+   
+   # Profit target on High
+   checkEqualsNumeric(9, df$exit.reason, "024: Bad exit.reason", tolerance=0)
+   checkEqualsNumeric(5198, df$exit.index, "025: Bad exit.index", tolerance=0)
+   checkEqualsNumeric(172.6816, df$exit.price, "026: Bad exit.price", tolerance=0.001)
+   checkEqualsNumeric(0.04, round(df$gain, 4), "027: Bad gain")
+   checkEqualsNumeric(0, round(df$mae, 4), "028: Bad mae")
+   checkEqualsNumeric(0.04, round(df$mfe, 5), "029: Bad mfe")
 }

@@ -17,14 +17,16 @@ inline bool isNA(double d) { return R_IsNA(d); }
 #define STOP_LIMIT_ON_OPEN       1
 #define STOP_LIMIT_ON_HIGH       2
 #define STOP_LIMIT_ON_LOW        3
-#define STOP_TRAILING_ON_OPEN    4
-#define STOP_TRAILING_ON_HIGH    5
-#define STOP_TRAILING_ON_LOW     6
-#define STOP_TRAILING_ON_CLOSE   7
-#define PROFIT_TARGET_ON_OPEN    8
-#define PROFIT_TARGET_ON_HIGH    9
-#define PROFIT_TARGET_ON_LOW    10
-#define MAX_DAYS_LIMIT          11
+#define STOP_LIMIT_ON_CLOSE      4
+#define STOP_TRAILING_ON_OPEN    5
+#define STOP_TRAILING_ON_HIGH    6
+#define STOP_TRAILING_ON_LOW     7
+#define STOP_TRAILING_ON_CLOSE   8
+#define PROFIT_TARGET_ON_OPEN    9
+#define PROFIT_TARGET_ON_HIGH   10
+#define PROFIT_TARGET_ON_LOW    11
+#define PROFIT_TARGET_ON_CLOSE  12
+#define MAX_DAYS_LIMIT          13
 
 void debugMessageFunc(const char * str)
 {
@@ -43,6 +45,275 @@ void debugMessageFunc(const char * str)
 #else
 #define DEBUG_MSG(ss)
 #endif
+
+struct TradeLocals {
+   double entryPrice;
+   double stopPrice;
+   double targetPrice;
+   double minPrice;
+   double maxPrice;
+   
+   double stopLoss;
+   double stopTrailing;
+   double profitTarget;
+   
+   bool hasStopLoss = false;
+   bool hasStopTrailing = false;
+   bool hasProfitTarget = false;
+};
+
+inline bool processShort(
+   double op,
+   double hi,
+   double lo,
+   double cl,
+   TradeLocals & locals,
+   double & exitPrice,
+   int & exitReason) {
+
+   // Process the Open first
+   if(locals.hasStopTrailing) {
+      if(op >= locals.stopPrice) {
+         exitPrice = op;
+         exitReason = STOP_TRAILING_ON_OPEN;
+   
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      } 
+   } else if(locals.hasStopLoss) {
+      if(op >= locals.stopPrice) {
+         exitPrice = op;
+         exitReason = STOP_LIMIT_ON_OPEN;
+         
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // Profit target is checked after stop orders
+   if(locals.hasProfitTarget) {
+      if(op <= locals.targetPrice) {
+         exitPrice = op;
+         exitReason = PROFIT_TARGET_ON_OPEN;
+                                    
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // The position is still on, update a trailing stop with the open
+   if(locals.hasStopTrailing && op <= locals.minPrice) {
+      locals.minPrice = op;
+      locals.stopPrice = locals.minPrice*(1.0 + std::abs(locals.stopTrailing));
+   }
+
+   // Process the "internal" part of the bar
+   if(locals.hasStopTrailing) {
+      // Check the high
+      if(hi >= locals.stopPrice) {
+         exitPrice = locals.stopPrice;
+         exitReason = STOP_TRAILING_ON_HIGH;
+         
+         // Update max price. We are making the assumption that the high happened
+         // before the low. Thus, we don't want to update the min price.
+         locals.maxPrice = std::max(locals.maxPrice, locals.stopPrice);
+         
+         return true;
+      }
+   } else if(locals.hasStopLoss) {
+      if(hi >= locals.stopPrice) {
+         exitPrice = locals.stopPrice;
+         exitReason = STOP_LIMIT_ON_HIGH;
+
+         // Update min and max price
+         locals.minPrice = std::min(lo, locals.minPrice);
+         locals.maxPrice = std::max(locals.stopPrice, locals.maxPrice);
+         
+         return true;
+      }
+   }
+   
+   // Profit target is checked after stop orders
+   if(locals.hasProfitTarget) {
+      if(lo <= locals.targetPrice) {
+         exitPrice = locals.targetPrice;
+         exitReason = PROFIT_TARGET_ON_LOW;
+                                    
+         // Update min and max price
+         locals.minPrice = std::min(locals.targetPrice, locals.minPrice);
+         locals.maxPrice = std::max(hi, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // The position is still on, update a trailing stop with the low
+   if(locals.hasStopTrailing && lo < locals.minPrice) {
+      locals.minPrice = lo;
+      locals.stopPrice = locals.minPrice*(1.0 + std::abs(locals.stopTrailing));
+   }
+   
+   // We have seen the Hi/Low - update min/maxPrice
+   locals.minPrice = std::min(lo, locals.minPrice);
+   locals.maxPrice = std::max(hi, locals.maxPrice);
+   
+   // Finally process the Close
+   if(locals.hasStopTrailing) {
+      if(cl >= locals.stopPrice) {
+         exitPrice = cl;
+         exitReason = STOP_TRAILING_ON_CLOSE;
+   
+         return true;
+      } 
+   } else if(locals.hasStopLoss) {
+      if(cl >= locals.stopPrice) {
+         exitPrice = cl;
+         exitReason = STOP_LIMIT_ON_CLOSE;
+
+         return true;
+      }
+   }
+   
+   // Finally process the Close for a stop trailing order. The stop trailing might
+   // have been updated by the Low, thus, we need one more check at the Close.
+   if(locals.hasProfitTarget) {
+      if(cl <= locals.targetPrice) {
+         exitPrice = cl;
+         exitReason = PROFIT_TARGET_ON_CLOSE;
+
+         return true;
+      }
+   }
+   
+   return false;
+}
+
+inline bool processLong(
+   double op,
+   double hi,
+   double lo,
+   double cl,
+   TradeLocals & locals,
+   double & exitPrice,
+   int & exitReason) {
+
+   // Process the Open first
+   if(locals.hasStopTrailing) {
+      if(op <= locals.stopPrice) {
+         exitPrice = op;
+         exitReason = STOP_TRAILING_ON_OPEN;
+   
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      } 
+   } else if(locals.hasStopLoss) {
+      if(op <= locals.stopPrice) {
+         exitPrice = op;
+         exitReason = STOP_LIMIT_ON_OPEN;
+         
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // Profit target is checked after stop orders
+   if(locals.hasProfitTarget) {
+      if(op >= locals.targetPrice) {
+         exitPrice = op;
+         exitReason = PROFIT_TARGET_ON_OPEN;
+                                    
+         // Update min and max price
+         locals.minPrice = std::min(op, locals.minPrice);
+         locals.maxPrice = std::max(op, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // The position is still on, update a trailing stop with the Open
+   if(locals.hasStopTrailing && op > locals.maxPrice) {
+      locals.maxPrice = op;
+      locals.stopPrice = locals.maxPrice*(1.0 - std::abs(locals.stopTrailing));
+   }
+
+   // Process the "internal" part of the bar
+   if(locals.hasStopTrailing) {
+      // Check the high
+      if(lo <= locals.stopPrice) {
+         exitPrice = locals.stopPrice;
+         exitReason = STOP_TRAILING_ON_LOW;
+         
+         // Update min price. We are making the assumption that the low happened
+         // before the high. Thus, we don't want to update the max price.
+         locals.minPrice = std::min(locals.minPrice, locals.stopPrice);
+         
+         return true;
+      }
+   } else if(locals.hasStopLoss) {
+      if(lo <= locals.stopPrice) {
+         exitPrice = locals.stopPrice;
+         exitReason = STOP_LIMIT_ON_LOW;
+
+         // Update min and max price
+         locals.minPrice = std::min(locals.stopPrice, locals.minPrice);
+         locals.maxPrice = std::max(hi, locals.maxPrice);
+         
+         return true;
+      }
+   }
+   
+   // Profit target is checked after stop orders
+   if(locals.hasProfitTarget) {
+      if(hi >= locals.targetPrice) {
+         exitPrice = locals.targetPrice;
+         exitReason = PROFIT_TARGET_ON_HIGH;
+                                    
+         // Update min and max price
+         locals.minPrice = std::min(lo, locals.minPrice);
+         locals.maxPrice = std::max(locals.targetPrice, locals.maxPrice);
+
+         return true;
+      }
+   }
+   
+   // The position is still on, update a trailing stop with the High
+   if(locals.hasStopTrailing && hi > locals.maxPrice) {
+      locals.maxPrice = hi;
+      locals.stopPrice = locals.maxPrice*(1.0 - std::abs(locals.stopTrailing));
+   }
+   
+   // We have seen the Hi/Low - update min/maxPrice
+   locals.minPrice = std::min(lo, locals.minPrice);
+   locals.maxPrice = std::max(hi, locals.maxPrice);
+   
+   // Finally process the Close for a stop trailing order. The stop trailing might
+   // have been updated by the High, thus, we need one more check at the Close.
+   if(locals.hasStopTrailing) {
+      if(cl <= locals.stopPrice) {
+         exitPrice = cl;
+         exitReason = STOP_TRAILING_ON_CLOSE;
+   
+         return true;
+      } 
+   }
+
+   return false;
+}
 
 // The actual workhorse used by the interface functions
 void processTrade(
@@ -64,17 +335,12 @@ void processTrade(
          double & mae,  // maximum adverse excursion
          double & mfe)  // maximum favorable excursion
 {
-   double entryPrice;
-   double stopPrice;
-   double targetPrice;
-   double minPrice;
-   double maxPrice;
-
    int ii;
-
-   bool hasStopLoss = false;
-   bool hasStopTrailing = false;
-   bool hasProfitTarget = false;
+   
+   TradeLocals locals;
+   locals.hasStopLoss = false;
+   locals.hasStopTrailing = false;
+   locals.hasProfitTarget = false;
 
    DEBUG_MSG("processTrade: entered");
    char buf[4096];
@@ -85,120 +351,28 @@ void processTrade(
    DEBUG_MSG(buf);
 
    // Currently positions are initiated only at the close
-   minPrice = maxPrice = entryPrice = cl[ibeg];
+   locals.minPrice = locals.maxPrice = locals.entryPrice = cl[ibeg];
    
    if(pos < 0) {
       // Short position
       if(!isNA(stopTrailing)) {
-         hasStopTrailing = true;
-         stopPrice = entryPrice*(1.0 + std::abs(stopLoss));
+         locals.hasStopTrailing = true;
+         locals.stopTrailing = stopTrailing;
+         locals.stopPrice = locals.entryPrice*(1.0 + std::abs(stopTrailing));
       } else if(!isNA(stopLoss)) {
-         hasStopLoss = true;
-         stopPrice = entryPrice*(1.0 + std::abs(stopLoss));
+         locals.hasStopLoss = true;
+         locals.stopLoss = stopLoss;
+         locals.stopPrice = locals.entryPrice*(1.0 + std::abs(stopLoss));
       }
 
       if(!isNA(profitTarget)) {
-         targetPrice = entryPrice*(1.0 - std::abs(profitTarget));
-         hasProfitTarget = true;
+         locals.targetPrice = locals.entryPrice*(1.0 - std::abs(profitTarget));
+         locals.profitTarget = profitTarget;
+         locals.hasProfitTarget = true;
       }
       
       for(ii = ibeg + 1; ii <= iend; ++ii) {
-         // Stop trailing orders and stop loss orders are mutually
-         // exclusive, with stop trailing having precedence.
-         if(hasStopTrailing) {
-            if(op[ii] > stopPrice ) {
-               exitPrice = op[ii];
-               exitReason = STOP_TRAILING_ON_OPEN;
-
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            } 
-            
-            // No exit at the open, chech whether we need to update the trailing stop
-            if(op[ii] < minPrice) {
-               minPrice = op[ii];
-               stopPrice = minPrice*(1.0 + std::abs(stopTrailing));
-            }
-
-            // Next check the high
-            if(hi[ii] > stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_TRAILING_ON_HIGH;
-               
-               // Update max price. We are making the assumption that the high happened
-               // before the low. Thus, we don't need to update the min price.
-               if(stopPrice > maxPrice) maxPrice = stopPrice;
-
-               break;
-            }
-            
-            // Before handling the close, update the stop if necessary
-            if(lo[ii] < minPrice) {
-               minPrice = lo[ii];
-               stopPrice = minPrice*(1.0 - std::abs(stopTrailing));
-            }
-            
-            // Check the close
-            if(cl[ii] > stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_TRAILING_ON_CLOSE;
-               
-               // Update max price, min price is already up-to-date (the preivous if-statement)
-               if(stopPrice > maxPrice) maxPrice = stopPrice;
-               
-               break;
-            }
-         } else if(hasStopLoss) {
-            if(op[ii] > stopPrice ) {
-               exitPrice = op[ii];
-               exitReason = STOP_LIMIT_ON_OPEN;
-               
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            } else if(hi[ii] > stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_LIMIT_ON_HIGH;
-
-               // Update min and max price
-               if(lo[ii] < minPrice) minPrice = lo[ii];
-               if(stopPrice > maxPrice) maxPrice = stopPrice;
-               
-               break;
-            }
-         }
-
-         // Profit target is checked after stop orders
-         if(hasProfitTarget) {
-            if(op[ii] < targetPrice) {
-               exitPrice = op[ii];
-               exitReason = PROFIT_TARGET_ON_OPEN;
-                                          
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            } else if(lo[ii] < targetPrice) {
-               exitPrice = targetPrice;
-               exitReason = PROFIT_TARGET_ON_LOW;
-                                          
-               // Update min and max price
-               if(targetPrice < minPrice) minPrice = targetPrice;
-               if(hi[ii] > maxPrice) maxPrice = hi[ii];
-
-               break;
-            }
-         }
-
-         // Update min and max price
-         if(lo[ii] < minPrice) minPrice = lo[ii];
-         if(hi[ii] > maxPrice) maxPrice = hi[ii];
+         if(processShort(op[ii], hi[ii], lo[ii], cl[ii], locals, exitPrice, exitReason)) break;
 
          // Maximum days for the trade reached
          if(maxDays > 0 && (ii - ibeg) == maxDays) {
@@ -213,129 +387,34 @@ void processTrade(
          exitPrice = cl[iend];
          exitReason = EXIT_ON_LAST;
          
-         // Update min and max price
-         if(lo[iend] < minPrice) minPrice = lo[iend];
-         if(hi[iend] > maxPrice) maxPrice = hi[iend];
-         
          ii = iend;
       }
 
-      gain = 1.0 - exitPrice/entryPrice;
+      gain = 1.0 - exitPrice / locals.entryPrice;
 
-      mae = 1.0 - maxPrice/entryPrice;
-      mfe = 1.0 - minPrice/entryPrice;
+      mae = 1.0 - locals.maxPrice / locals.entryPrice;
+      mfe = 1.0 - locals.minPrice / locals.entryPrice;
    } else {
       // Long position
       if(!isNA(stopTrailing)) {
-         hasStopTrailing = true;
-         stopPrice = entryPrice*(1.0 - std::abs(stopTrailing));
+         locals.hasStopTrailing = true;
+         locals.stopTrailing = stopTrailing;
+         locals.stopPrice = locals.entryPrice*(1.0 - std::abs(stopTrailing));
       } else if(!isNA(stopLoss)) {
-         hasStopLoss = true;
-         stopPrice = entryPrice*(1.0 - std::abs(stopLoss));
+         locals.hasStopLoss = true;
+         locals.stopLoss = stopLoss;
+         locals.stopPrice = locals.entryPrice*(1.0 - std::abs(stopLoss));
       }
 
       if(!isNA(profitTarget)) {
-         hasProfitTarget = true;
-         targetPrice = entryPrice*(1.0 + std::abs(profitTarget));
+         locals.hasProfitTarget = true;
+         locals.profitTarget = profitTarget;
+         locals.targetPrice = locals.entryPrice*(1.0 + std::abs(profitTarget));
       }
       
       for(ii = ibeg + 1; ii <= iend; ++ii) {
-         if(hasStopTrailing) {
-            if(op[ii] < stopPrice) {
-               exitPrice = op[ii];
-               exitReason = STOP_TRAILING_ON_OPEN;
+         if(processLong(op[ii], hi[ii], lo[ii], cl[ii], locals, exitPrice, exitReason)) break;
 
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            }
-
-            // No exit on the open. Check whether we need to update
-            // the trailing stop taking the open into account.
-            if(op[ii] > maxPrice) {
-               maxPrice = op[ii];
-               stopPrice = maxPrice * (1.0 - std::abs(stopTrailing));
-            }
-
-            // Next check the low
-            if(lo[ii] < stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_TRAILING_ON_LOW;
-               
-               // Update min price. We are making the assumption that the low happened
-               // before the high. Thus, we don't need to update the max price.
-               if(stopPrice < minPrice) minPrice = stopPrice;
-
-               break;
-               
-            }
-
-            // Before handling the close, update the stop if necessary
-            if(hi[ii] > maxPrice) {
-               maxPrice = hi[ii];
-               stopPrice = maxPrice*(1.0 - std::abs(stopTrailing));
-            }
-            
-            // Check the close
-            if(cl[ii] < stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_TRAILING_ON_CLOSE;
-               
-               // Update min price, max price is already up-to-date (the preivous if-statement)
-               if(stopPrice < minPrice) minPrice = stopPrice;
-               
-               break;
-            }
-         } else if(hasStopLoss) {
-            if(op[ii] < stopPrice ) {
-               exitPrice = op[ii];
-               exitReason = STOP_LIMIT_ON_OPEN;
-               
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            } else if(lo[ii] < stopPrice) {
-               exitPrice = stopPrice;
-               exitReason = STOP_LIMIT_ON_LOW;
-
-               // Update min and max price
-               if(stopPrice < minPrice) minPrice = stopPrice;
-               if(hi[ii] > maxPrice) maxPrice = hi[ii];
-
-               break;
-            }
-         }
-         
-         if(hasProfitTarget) {
-            if(op[ii] > targetPrice) {
-               exitPrice = op[ii];
-               exitReason = PROFIT_TARGET_ON_OPEN;
-               
-               // Update min and max price
-               if(op[ii] < minPrice) minPrice = op[ii];
-               if(op[ii] > maxPrice) maxPrice = op[ii];
-
-               break;
-            } else if(hi[ii] > targetPrice) {
-               exitPrice = targetPrice;
-               exitReason = PROFIT_TARGET_ON_HIGH;
-
-               // Update min and max price
-               if(lo[ii] < minPrice) minPrice = lo[ii];
-               if(targetPrice > maxPrice) maxPrice = targetPrice;
-
-               break;
-            }
-         }
-
-         // Update min and max price
-         if(lo[ii] < minPrice) minPrice = lo[ii];
-         if(hi[ii] > maxPrice) maxPrice = hi[ii];
-         
          // Maximum days for the trade reached
          if(maxDays > 0 && (ii - ibeg) == maxDays) {
             exitPrice = cl[ii];
@@ -349,17 +428,13 @@ void processTrade(
          exitPrice = cl[iend];
          exitReason = EXIT_ON_LAST;
          
-         // Update min and max price
-         if(lo[iend] < minPrice) minPrice = lo[iend];
-         if(hi[iend] > maxPrice) maxPrice = hi[iend];
-
          ii = iend;
       }
 
-      gain = exitPrice/entryPrice - 1.0;
+      gain = exitPrice / locals.entryPrice - 1.0;
 
-      mae = minPrice/entryPrice - 1.0;
-      mfe = maxPrice/entryPrice - 1.0;
+      mae = locals.minPrice / locals.entryPrice - 1.0;
+      mfe = locals.maxPrice / locals.entryPrice - 1.0;
    }
 
    exitIndex = ii;
