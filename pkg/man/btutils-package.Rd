@@ -3,22 +3,21 @@
 \alias{btutils}
 \docType{package}
 \title{
-Utilities for simple back testing of trading strategies.
+Utilities to facilitate back testing of trading strategies.
 }
 \description{
-A framework to test the impact of risk and money management
-trading techniques (stop loss, profit target, to name a few)
-on a trading strategy.
+A collection of utilities to help back testing of trading
+strategies. Mostly written in C++, thus, speed is not an issue.
 }
 \details{
 \tabular{ll}{
 Package: \tab btutils\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 0.1\cr
 Date: \tab 2013-05-07\cr
-License: \tab BSD_2_clause\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+Best place to start:\cr \code{\link{simple.trade.indicator}}\cr
+  \code{\link{processTrades}}\cr
 }
 \author{
 Ivan Popivanov
@@ -29,11 +28,23 @@ Maintainer: Ivan Popivanov <ivan.popivanov@gmail.com>
 ~~ Literature or other references for background information ~~
 }
 ~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
-\keyword{ package }
+\keyword{package}
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-%% ~~ simple examples of the most important functions ~~
+require(quantmod)
+require(btutils)
+
+# Download some data from Yahoo
+spy = getSymbols("SPY", auto.assign=FALSE)
+
+# Compute the indicator for a 200 day moving average
+spy.macd = MACD(Cl(spy), nFast=1, nSlow=200)[,1]
+spy.indicator = ifelse(spy.macd < 0, 0, 1)
+
+spy.trades = trade.indicator(OHLC(spy), spy.indicator, stop.loss=0.02)
+spy.rets = ROC(Cl(SPY), n=1, type="discrete")
+ec = equity.curve(spy.trades, spy.rets)
 }

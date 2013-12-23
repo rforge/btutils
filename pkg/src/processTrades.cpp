@@ -57,9 +57,15 @@ struct TradeLocals {
    double stopTrailing;
    double profitTarget;
    
-   bool hasStopLoss = false;
-   bool hasStopTrailing = false;
-   bool hasProfitTarget = false;
+   bool hasStopLoss;
+   bool hasStopTrailing;
+   bool hasProfitTarget;
+   
+   TradeLocals() :
+      hasStopLoss(false),
+      hasStopTrailing(false),
+      hasProfitTarget(false)
+   {}
 };
 
 inline bool processShort(
@@ -670,37 +676,45 @@ Rcpp::List processTradesInterface(
                Rcpp::Named("Reason") = reason);
 }
 
-void tradesFromSignal(
-         const std::vector<double> & sig,
+void tradesFromIndicator(
+         const std::vector<double> & indicator,
          std::vector<int> & ibeg,
          std::vector<int> & iend,
          std::vector<int> & position)
 {
-   // Process the first element
-   if(sig[0] != 0)
-   {
-      ibeg.push_back(0);
-      position.push_back(sig[0]);
-   }
-
    // The last index needs special processing
-   int lastId = sig.size() - 1;
+   int lastId = indicator.size() - 1;
    
-   for(int ii = 1; ii < lastId; ++ii)
-   {
-      if(sig[ii] != sig[ii-1])
+   int ii = 0;
+   // Skipt starting NAs
+   while(ii < lastId && isNA(indicator[ii])) ++ii;
+   
+   if(ii < lastId) {
+      // Process the first element
+      if(indicator[ii] != 0.0)
       {
-         if(sig[ii-1] != 0)
+         ibeg.push_back(ii);
+         position.push_back(indicator[ii]);
+      }
+      
+      ++ii;
+      
+      for(; ii < lastId; ++ii)
+      {
+         if(indicator[ii] != indicator[ii-1])
          {
-            // Close the open position
-            iend.push_back(ii);
-         }
-         
-         if(sig[ii] != 0)
-         {
-            // Open a new position
-            ibeg.push_back(ii);
-            position.push_back(sig[ii]);
+            if(indicator[ii-1] != 0.0)
+            {
+               // Close the open position
+               iend.push_back(ii);
+            }
+            
+            if(indicator[ii] != 0.0)
+            {
+               // Open a new position
+               ibeg.push_back(ii);
+               position.push_back(indicator[ii]);
+            }
          }
       }
    }
@@ -714,14 +728,14 @@ void tradesFromSignal(
    assert(iend.size() == ibeg.size());
 }
 
-// [[Rcpp::export("trades.from.signal.interface")]]
-Rcpp::List tradesFromSignalInterface(SEXP sigIn)
+// [[Rcpp::export("trades.from.indicator.interface")]]
+Rcpp::List tradesFromIndicatorInterface(SEXP indicatorIn)
 {
-   std::vector<double> sig = Rcpp::as< std::vector<double> >( sigIn );
+   std::vector<double> indicator = Rcpp::as< std::vector<double> >( indicatorIn );
    std::vector<int> ibeg;
    std::vector<int> iend;
    std::vector<int> position;
-   tradesFromSignal(sig, ibeg, iend, position);
+   tradesFromIndicator(indicator, ibeg, iend, position);
    
    // vectors in c++ are zero based and in R are one based.
    // convert to the R format on the way out.
@@ -737,36 +751,28 @@ Rcpp::List tradesFromSignalInterface(SEXP sigIn)
                Rcpp::Named("Position") = Rcpp::IntegerVector(position.begin(), position.end()));
 }
 
-void getReturns(
+void filterReturns(
          const std::vector<double> & returns,
          const std::vector<int> & ibeg,
          const std::vector<int> & iend,
          const std::vector<int> & position,
          std::vector<double> & result)
 {
-   DEBUG_MSG("getReturns: entered");
    result.resize(0);
    result.resize(returns.size(), 0.0);
    for(int ii = 0; ii < ibeg.size(); ++ii)
    {
       for(int jj = ibeg[ii] + 1; jj <= iend[ii]; ++jj)
       {
-         /*
-         if(jj < 0 || jj >= returns.size())
-         {
-            
-            snprintf(buf, sizeof(buf), "BAD INDEX = %d", jj);
-            DEBUG_MSG(buf);
+         if(!isNA(returns[jj])) {
+            result[jj] = position[ii] * returns[jj];
          }
-         */
-         result[jj] = position[ii] * returns[jj];
       }
    }
-   DEBUG_MSG("getReturns: exited");
 }
 
-// [[Rcpp::export("get.returns.interface")]]
-Rcpp::NumericVector getReturnsInterface(SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP returnsIn)
+// [[Rcpp::export("filter.returns.interface")]]
+Rcpp::NumericVector filterReturnsInterface(SEXP returnsIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn)
 {
    // Convert ohlc into std vectors
    std::vector<double> returns = Rcpp::as< std::vector<double> >(returnsIn);
@@ -782,7 +788,7 @@ Rcpp::NumericVector getReturnsInterface(SEXP ibegIn, SEXP iendIn, SEXP positionI
    }
    
    std::vector<double> result;
-   getReturns(returns, ibeg, iend, position, result);
+   filterReturns(returns, ibeg, iend, position, result);
 
    return Rcpp::NumericVector(result.begin(), result.end());
 }

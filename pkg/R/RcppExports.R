@@ -9,11 +9,11 @@ process.trades.interface <- function(ohlcIn, ibegsIn, iendsIn, positionIn, stopL
     .Call('btutils_processTradesInterface', PACKAGE = 'btutils', ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn)
 }
 
-trades.from.signal.interface <- function(sigIn) {
-    .Call('btutils_tradesFromSignalInterface', PACKAGE = 'btutils', sigIn)
+trades.from.indicator.interface <- function(indicatorIn) {
+    .Call('btutils_tradesFromIndicatorInterface', PACKAGE = 'btutils', indicatorIn)
 }
 
-get.returns.interface <- function(ibegIn, iendIn, positionIn, returnsIn) {
-    .Call('btutils_getReturnsInterface', PACKAGE = 'btutils', ibegIn, iendIn, positionIn, returnsIn)
+filter.returns.interface <- function(returnsIn, ibegIn, iendIn, positionIn) {
+    .Call('btutils_filterReturnsInterface', PACKAGE = 'btutils', returnsIn, ibegIn, iendIn, positionIn)
 }
 

@@ -52,33 +52,33 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// tradesFromSignalInterface
-Rcpp::List tradesFromSignalInterface(SEXP sigIn);
-RcppExport SEXP btutils_tradesFromSignalInterface(SEXP sigInSEXP) {
+// tradesFromIndicatorInterface
+Rcpp::List tradesFromIndicatorInterface(SEXP indicatorIn);
+RcppExport SEXP btutils_tradesFromIndicatorInterface(SEXP indicatorInSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type sigIn(sigInSEXP );
-        Rcpp::List __result = tradesFromSignalInterface(sigIn);
+        Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP );
+        Rcpp::List __result = tradesFromIndicatorInterface(indicatorIn);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
     return __sexp_result;
 END_RCPP
 }
-// getReturnsInterface
-Rcpp::NumericVector getReturnsInterface(SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP returnsIn);
-RcppExport SEXP btutils_getReturnsInterface(SEXP ibegInSEXP, SEXP iendInSEXP, SEXP positionInSEXP, SEXP returnsInSEXP) {
+// filterReturnsInterface
+Rcpp::NumericVector filterReturnsInterface(SEXP returnsIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn);
+RcppExport SEXP btutils_filterReturnsInterface(SEXP returnsInSEXP, SEXP ibegInSEXP, SEXP iendInSEXP, SEXP positionInSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type returnsIn(returnsInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type ibegIn(ibegInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type iendIn(iendInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type returnsIn(returnsInSEXP );
-        Rcpp::NumericVector __result = getReturnsInterface(ibegIn, iendIn, positionIn, returnsIn);
+        Rcpp::NumericVector __result = filterReturnsInterface(returnsIn, ibegIn, iendIn, positionIn);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

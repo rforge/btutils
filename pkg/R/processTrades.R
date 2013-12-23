@@ -1,3 +1,18 @@
+EXIT_ON_LAST           =  0
+STOP_LIMIT_ON_OPEN     =  1
+STOP_LIMIT_ON_HIGH     =  2
+STOP_LIMIT_ON_LOW      =  3
+STOP_LIMIT_ON_CLOSE    =  4
+STOP_TRAILING_ON_OPEN  =  5
+STOP_TRAILING_ON_HIGH  =  6
+STOP_TRAILING_ON_LOW   =  7
+STOP_TRAILING_ON_CLOSE =  8
+PROFIT_TARGET_ON_OPEN  =  9
+PROFIT_TARGET_ON_HIGH  = 10
+PROFIT_TARGET_ON_LOW   = 11
+PROFIT_TARGET_ON_CLOSE = 12
+MAX_DAYS_LIMIT         = 13
+
 # entry - the trade's entry
 # exit - the trade's exit
 # pos - long (1) or short (-1)
@@ -21,10 +36,9 @@ process.trade <- function(
                      max.days=0) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
    tmp = op[,1]
-   tmp[] = 1:NROW(tmp)
-
-   ibeg = as.numeric(tmp[entry])
-   iend = as.numeric(tmp[exit])
+   
+   ibeg = tmp[entry, which.i=T]
+   iend = tmp[exit, which.i=T]
 
    return(process.trade.interface(
                op, hi, lo, cl,
@@ -51,7 +65,7 @@ process.trades <- function(ohlc, trades) {
    tmp = ohlc[,1]
    tmp[] = 1:NROW(tmp)
    
-   stopifnot(NCOL(trades) < 3)
+   stopifnot(NCOL(trades) >= 3)
 
    if(NCOL(trades) < 4) {
       # Append a stop loss column
@@ -73,8 +87,8 @@ process.trades <- function(ohlc, trades) {
       trades = cbind(trades, rep(0, NROW(trades)))
    }
 
-   ibeg = as.integer(tmp[trades[,1]])
-   iend = as.integer(tmp[trades[,2]])
+   ibeg = returns[trades[,1], which.i=T]
+   iend = returns[trades[,2], which.i=T]
    
    res = process.trades.interface(
                ohlc,          # OHLC
@@ -97,20 +111,20 @@ process.trades <- function(ohlc, trades) {
    return(res)
 }
 
-# given a signal (weights) as an xts, returns trades as a data frame:
+# given an indicator (weights) as an xts, returns trades as a data frame:
 #     entry | exit | position
-trades.from.signal = function(sig) {
-   res = trades.from.signal.interface(sig)
+trades.from.indicator = function(indicator) {
+   res = trades.from.indicator.interface(indicator)
    res = data.frame(res)
-   sig.index = index(sig)
-   res[,1] = sig.index[res[,1]]
-   res[,2] = sig.index[res[,2]]
+   indicator.index = index(indicator)
+   res[,1] = indicator.index[res[,1]]
+   res[,2] = indicator.index[res[,2]]
    return(res)
 }
 
-# trades a signal with the same stop/profit settings for all trades
-simple.trade.signal = function(ohlc, signal, stop.loss=NA, stop.trailing=NA, profit.target=NA, max.days=0) {
-   trades = trades.from.signal(signal)
+# trades an indicator with the same stop/profit settings for all trades
+trade.indicator = function(ohlc, indicator, stop.loss=NA, stop.trailing=NA, profit.target=NA, max.days=0) {
+   trades = trades.from.indicator(indicator)
    trades[,4] = rep(stop.loss, nrow(trades))
    trades[,5] = rep(stop.trailing, nrow(trades))
    trades[,6] = rep(profit.target, nrow(trades))
@@ -120,13 +134,10 @@ simple.trade.signal = function(ohlc, signal, stop.loss=NA, stop.trailing=NA, pro
    return(res)
 }
 
-get.returns = function(trades, returns) {
+filter.returns = function(returns, trades) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
-   tmp = returns[,1]
-   tmp[] = 1:NROW(tmp)
-   
-   ibeg = as.integer(tmp[trades[,1]])
-   iend = as.integer(tmp[trades[,2]])
+   ibeg = returns[trades[,1], which.i=T]
+   iend = returns[trades[,2], which.i=T]
 
-   return(reclass(get.returns.interface(ibeg, iend, as.integer(trades[,3]), returns), returns))
+   return(reclass(filter.returns.interface(returns, ibeg, iend, as.integer(trades[,3])), returns))
 }
