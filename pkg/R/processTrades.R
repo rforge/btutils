@@ -62,8 +62,8 @@ process.trade <- function(
 # if both stop.loss and stop.trailing are specified, the stop.trailing is used
 process.trades <- function(ohlc, trades) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
-   tmp = ohlc[,1]
-   tmp[] = 1:NROW(tmp)
+   ibeg = ohlc[trades[,1], which.i=T]
+   iend = ohlc[trades[,2], which.i=T]
    
    stopifnot(NCOL(trades) >= 3)
 
@@ -86,9 +86,6 @@ process.trades <- function(ohlc, trades) {
       # Append a max days column
       trades = cbind(trades, rep(0, NROW(trades)))
    }
-
-   ibeg = returns[trades[,1], which.i=T]
-   iend = returns[trades[,2], which.i=T]
    
    res = process.trades.interface(
                ohlc,          # OHLC
