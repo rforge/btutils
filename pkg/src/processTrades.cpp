@@ -1,7 +1,8 @@
-#include <Rcpp.h>
 #include <vector>
 #include <cmath>
 #include <cassert>
+
+#include "common.h"
 
 using namespace Rcpp;
 
@@ -9,9 +10,6 @@ namespace
 {
    char buf[4096];
 }
-
-// This needs to be changed if the c++ code is used outside R
-inline bool isNA(double d) { return R_IsNA(d); }
 
 #define EXIT_ON_LAST             0
 #define STOP_LIMIT_ON_OPEN       1

@@ -5,6 +5,23 @@
 
 using namespace Rcpp;
 
+// capTradeDurationInterface
+Rcpp::NumericVector capTradeDurationInterface(SEXP indicatorIn, int shortDurationCap, int longDurationCap);
+RcppExport SEXP btutils_capTradeDurationInterface(SEXP indicatorInSEXP, SEXP shortDurationCapSEXP, SEXP longDurationCapSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP );
+        Rcpp::traits::input_parameter< int >::type shortDurationCap(shortDurationCapSEXP );
+        Rcpp::traits::input_parameter< int >::type longDurationCap(longDurationCapSEXP );
+        Rcpp::NumericVector __result = capTradeDurationInterface(indicatorIn, shortDurationCap, longDurationCap);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // processTradeInterface
 Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays);
 RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP) {

@@ -22,7 +22,7 @@ MAX_DAYS_LIMIT         = 13
 # max.days - the maximum number of days for this trade, 0 if none
 #
 # if both stop.loss and stop.trailing are specified, the stop.trailing is used
-process.trade <- function(
+process.trade = function(
                      op,
                      hi,
                      lo,
@@ -60,7 +60,7 @@ process.trade <- function(
 #     profit.target - a profit targe, NA if none
 #     max.days - maximum days to stay in the trade, less or equal to 0 if none
 # if both stop.loss and stop.trailing are specified, the stop.trailing is used
-process.trades <- function(ohlc, trades) {
+process.trades = function(ohlc, trades) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
    ibeg = ohlc[trades[,1], which.i=T]
    iend = ohlc[trades[,2], which.i=T]

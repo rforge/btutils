@@ -5,6 +5,7 @@ export(process.trades)
 export(trades.from.indicator)
 export(trade.indicator)
 export(filter.returns)
+export(cap.trade.duration)
 
 export(EXIT_ON_LAST)
 export(STOP_LIMIT_ON_OPEN)
