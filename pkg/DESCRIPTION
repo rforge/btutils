@@ -6,6 +6,6 @@ Date: 2013-05-07
 Author: Ivan Popivanov
 Maintainer: Ivan Popivanov <ivan.popivanov@gmail.com>
 Description: A framework to test the impact of risk and money management trading techniques (stop loss, profit target, to name a few) on a trading strategy.
-License: BSD_2_clause
+License: BSD_2_clause + file LICENSE
 Depends: Rcpp (>= 0.10.2)
 LinkingTo: Rcpp
