@@ -5,6 +5,10 @@ cap.trade.duration.interface <- function(indicatorIn, shortDurationCap, longDura
     .Call('btutils_capTradeDurationInterface', PACKAGE = 'btutils', indicatorIn, shortDurationCap, longDurationCap)
 }
 
+construct.indicator.interface <- function(longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn) {
+    .Call('btutils_constructIndicatorInterface', PACKAGE = 'btutils', longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn)
+}
+
 process.trade.interface <- function(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays) {
     .Call('btutils_processTradeInterface', PACKAGE = 'btutils', opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays)
 }

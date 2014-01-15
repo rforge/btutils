@@ -6,11 +6,6 @@
 
 using namespace Rcpp;
 
-namespace
-{
-   char buf[4096];
-}
-
 #define EXIT_ON_LAST             0
 #define STOP_LIMIT_ON_OPEN       1
 #define STOP_LIMIT_ON_HIGH       2
@@ -26,6 +21,14 @@ namespace
 #define PROFIT_TARGET_ON_CLOSE  12
 #define MAX_DAYS_LIMIT          13
 
+// #define DEBUG
+
+#ifdef DEBUG
+namespace
+{
+   char buf[4096];
+}
+
 void debugMessageFunc(const char * str)
 {
    FILE * file = fopen("/home/ivannp/ttt/debug.txt", "a");
@@ -36,9 +39,6 @@ void debugMessageFunc(const char * str)
    }
 }
 
-#define DEBUG
-
-#ifdef DEBUG
 #define DEBUG_MSG(ss) debugMessageFunc((ss))
 #else
 #define DEBUG_MSG(ss)
@@ -346,14 +346,6 @@ void processTrade(
    locals.hasStopTrailing = false;
    locals.hasProfitTarget = false;
 
-   DEBUG_MSG("processTrade: entered");
-   char buf[4096];
-   snprintf(buf,
-            sizeof(buf),
-            "%d - %d: stopLoss = %f, stopTrailing = %f, profitTarget = %f", 
-            ibeg, iend, stopLoss, stopTrailing, profitTarget);
-   DEBUG_MSG(buf);
-
    // Currently positions are initiated only at the close
    locals.minPrice = locals.maxPrice = locals.entryPrice = cl[ibeg];
    
@@ -442,8 +434,6 @@ void processTrade(
    }
 
    exitIndex = ii;
-   
-   DEBUG_MSG("processTrade: exited");
 }
 
 // [[Rcpp::export("process.trade.interface")]]
@@ -535,14 +525,13 @@ void processTrades(
       int exitIndex;
       int exitReason;
 
-      char buf[4096];
       processTrade(
             op, hi, lo, cl,
             ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii], maxDays[ii],
             exitIndex, exitPrice, exitReason, gain, mae, mfe);
-      snprintf(buf, sizeof(buf), "%d: exitIndex = %d, exitPrice = %f, exitReason = %d, gain = %f, mae = %f, mfe = %f", 
-               ii, exitIndex, exitPrice, exitReason, gain, mae, mfe);
-      DEBUG_MSG(buf);
+      // snprintf(buf, sizeof(buf), "%d: exitIndex = %d, exitPrice = %f, exitReason = %d, gain = %f, mae = %f, mfe = %f", 
+      //         ii, exitIndex, exitPrice, exitReason, gain, mae, mfe);
+      // DEBUG_MSG(buf);
 
       iendOut.push_back(exitIndex);
       exitPriceOut.push_back(exitPrice);
