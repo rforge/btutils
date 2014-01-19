@@ -44,6 +44,6 @@ spy.macd = MACD(Cl(spy), nFast=1, nSlow=200)[,1]
 spy.indicator = ifelse(spy.macd < 0, 0, 1)
 
 spy.trades = trade.indicator(OHLC(spy), spy.indicator, stop.loss=0.02)
-spy.rets = ROC(Cl(SPY), n=1, type="discrete")
-ec = equity.curve(spy.trades, spy.rets)
+spy.rets = ROC(Cl(spy), n=1, type="discrete")
+ec = filter.returns(spy.rets, spy.trades)
 }

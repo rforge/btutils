@@ -42,9 +42,12 @@ Ivan Popivanov
 ## Long entries when RSI2 > 90, long exits when RSI2 < 30
 ## Short entries when RSI2 < 10, short exits when RSI > 70
 
+require(quantmod)
+
+spy = getSymbols("SPY", auto.assign=FALSE)
 rsi = RSI(Cl(spy), n=2)
 lentries = !is.na(rsi) & rsi < 10
-lexits = !is.na(rsi) & > 70
+lexits = !is.na(rsi) & rsi > 70
 sentries = !is.na(rsi) & rsi > 90
 sexits = !is.na(rsi) & rsi < 30
 indicator = construct.indicator(lentries, lexits, sentries, sexits)
