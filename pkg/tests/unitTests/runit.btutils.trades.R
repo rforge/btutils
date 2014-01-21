@@ -21,12 +21,14 @@ test.process.trade.long = function() {
    mfe = max.price / as.numeric(Cl(drm[5205])) - 1
    checkEqualsNumeric(mae, df$mae, tolerance=0.00001)
    checkEqualsNumeric(mfe, df$mfe, tolerance=0.00001)
+   checkEqualsNumeric(min.price, df$min.price)
+   checkEqualsNumeric(max.price, df$max.price)
    
    # Add a stop loss which is not hit
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5205, 5225, 1, 0.05)
-   
-   # 0 - exit on the last day
    checkEqualsNumeric(EXIT_ON_LAST, df$exit.reason, "003: Bad exit.reason", tolerance=0)
+   checkEqualsNumeric(as.numeric(max(Hi(drm[5206:5225]))), df$max.price, "003a: Bad max.price")
+   checkEqualsNumeric(as.numeric(min(Lo(drm[5206:5225]))), df$min.price, "003b: Bad min.price")
    
    # Add a stop loss which is hit at the low
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5205, 5225, 1, 0.01)

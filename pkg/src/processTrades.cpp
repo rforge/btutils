@@ -362,6 +362,8 @@ void processTrade(
          double & exitPrice,
          int & exitReason,
          double & gain,
+         double & minPrice,
+         double & maxPrice,
          double & mae,  // maximum adverse excursion
          double & mfe)  // maximum favorable excursion
 {
@@ -416,6 +418,9 @@ void processTrade(
 
       mae = 1.0 - locals.maxPrice / locals.entryPrice;
       mfe = 1.0 - locals.minPrice / locals.entryPrice;
+      
+      minPrice = locals.minPrice;
+      maxPrice = locals.maxPrice;
    } else {
       // Long position
       if(!isNA(stopTrailing)) {
@@ -457,6 +462,9 @@ void processTrade(
 
       mae = locals.minPrice / locals.entryPrice - 1.0;
       mfe = locals.maxPrice / locals.entryPrice - 1.0;
+      
+      minPrice = locals.minPrice;
+      maxPrice = locals.maxPrice;
    }
 
    exitIndex = ii;
@@ -481,7 +489,7 @@ Rcpp::List processTradeInterface(
    std::vector<double> lo = Rcpp::as< std::vector<double> >(loIn);
    std::vector<double> cl = Rcpp::as< std::vector<double> >(clIn);
 
-   double exitPrice;
+   double exitPrice, minPrice, maxPrice;
    double gain, mae, mfe;
    int exitIndex;
    int exitReason;
@@ -490,7 +498,7 @@ Rcpp::List processTradeInterface(
    processTrade(
       op, hi, lo, cl,
       ibeg-1, iend-1, pos, stopLoss, stopTrailing, profitTarget, maxDays,
-      exitIndex, exitPrice, exitReason, gain, mae, mfe);
+      exitIndex, exitPrice, exitReason, gain, minPrice, maxPrice, mae, mfe);
    
    // Build and return the result
    return Rcpp::List::create(
@@ -498,6 +506,8 @@ Rcpp::List processTradeInterface(
                         Rcpp::Named("exit.price") = exitPrice,
                         Rcpp::Named("exit.reason") = exitReason,
                         Rcpp::Named("gain") = gain,
+                        Rcpp::Named("min.price") = minPrice,
+                        Rcpp::Named("max.price") = maxPrice,
                         Rcpp::Named("mae") = mae,
                         Rcpp::Named("mfe") = mfe);
 }
@@ -517,6 +527,8 @@ void processTrades(
          std::vector<int> & iendOut,
          std::vector<double> & exitPriceOut,
          std::vector<double> & gainOut,
+         std::vector<double> & minPriceOut,
+         std::vector<double> & maxPriceOut,
          std::vector<double> & maeOut,
          std::vector<double> & mfeOut,
          std::vector<int> & exitReasonOut )
@@ -529,6 +541,12 @@ void processTrades(
 
    exitPriceOut.resize(0);
    exitPriceOut.reserve(ibeg.size());
+   
+   minPriceOut.resize(0);
+   minPriceOut.reserve(ibeg.size());
+   
+   maxPriceOut.resize(0);
+   maxPriceOut.reserve(ibeg.size());
 
    gainOut.resize(0);
    gainOut.reserve(ibeg.size());
@@ -544,7 +562,7 @@ void processTrades(
 
    for(int ii = 0; ii < ibeg.size(); ++ii )
    {
-      double exitPrice;
+      double exitPrice, minPrice, maxPrice;
       double gain;
       double mae;
       double mfe;
@@ -554,13 +572,15 @@ void processTrades(
       processTrade(
             op, hi, lo, cl,
             ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii], maxDays[ii],
-            exitIndex, exitPrice, exitReason, gain, mae, mfe);
+            exitIndex, exitPrice, exitReason, gain, minPrice, maxPrice, mae, mfe);
       // snprintf(buf, sizeof(buf), "%d: exitIndex = %d, exitPrice = %f, exitReason = %d, gain = %f, mae = %f, mfe = %f", 
       //         ii, exitIndex, exitPrice, exitReason, gain, mae, mfe);
       // DEBUG_MSG(buf);
 
       iendOut.push_back(exitIndex);
       exitPriceOut.push_back(exitPrice);
+      minPriceOut.push_back(minPrice);
+      maxPriceOut.push_back(maxPrice);
       gainOut.push_back(gain);
       maeOut.push_back(mae);
       mfeOut.push_back(mfe);
@@ -626,6 +646,8 @@ Rcpp::List processTradesInterface(
    // Allocate the output vectors
    std::vector<int> iendOut;
    std::vector<double> exitPrice;
+   std::vector<double> minPrice;
+   std::vector<double> maxPrice;
    std::vector<double> gain;
    std::vector<double> mae;
    std::vector<double> mfe;
@@ -635,7 +657,7 @@ Rcpp::List processTradesInterface(
    processTrades(
          op, hi, lo, cl,
          ibeg, iend, position, stopLoss, stopTrailing, profitTarget, maxDays,
-         iendOut, exitPrice, gain, mae, mfe, reason);
+         iendOut, exitPrice, gain, minPrice, maxPrice, mae, mfe, reason);
 
    /* Just some values for testing
    for(int ii = 0; ii < ibeg.size(); ++ii )
@@ -684,6 +706,8 @@ Rcpp::List processTradesInterface(
                Rcpp::Named("ProfitTarget") = profitTarget,
                Rcpp::Named("ExitPrice") = exitPrice,
                Rcpp::Named("Gain") = gain,
+               Rcpp::Named("MinPrice") = minPrice,
+               Rcpp::Named("MaxPrice") = maxPrice,
                Rcpp::Named("MAE") = mae,
                Rcpp::Named("MFE") = mfe,
                Rcpp::Named("Reason") = reason);
