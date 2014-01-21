@@ -41,8 +41,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // processTradeInterface
-Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays);
-RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP) {
+Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays, double tickSize);
+RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP, SEXP tickSizeSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -58,7 +58,8 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< double >::type stopTrailing(stopTrailingSEXP );
         Rcpp::traits::input_parameter< double >::type profitTarget(profitTargetSEXP );
         Rcpp::traits::input_parameter< int >::type maxDays(maxDaysSEXP );
-        Rcpp::List __result = processTradeInterface(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays);
+        Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP );
+        Rcpp::List __result = processTradeInterface(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -66,8 +67,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // processTradesInterface
-Rcpp::List processTradesInterface(SEXP ohlcIn, SEXP ibegsIn, SEXP iendsIn, SEXP positionIn, SEXP stopLossIn, SEXP stopTrailingIn, SEXP profitTargetIn, SEXP maxDaysIn);
-RcppExport SEXP btutils_processTradesInterface(SEXP ohlcInSEXP, SEXP ibegsInSEXP, SEXP iendsInSEXP, SEXP positionInSEXP, SEXP stopLossInSEXP, SEXP stopTrailingInSEXP, SEXP profitTargetInSEXP, SEXP maxDaysInSEXP) {
+Rcpp::List processTradesInterface(SEXP ohlcIn, SEXP ibegsIn, SEXP iendsIn, SEXP positionIn, SEXP stopLossIn, SEXP stopTrailingIn, SEXP profitTargetIn, SEXP maxDaysIn, double tickSize);
+RcppExport SEXP btutils_processTradesInterface(SEXP ohlcInSEXP, SEXP ibegsInSEXP, SEXP iendsInSEXP, SEXP positionInSEXP, SEXP stopLossInSEXP, SEXP stopTrailingInSEXP, SEXP profitTargetInSEXP, SEXP maxDaysInSEXP, SEXP tickSizeSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -80,7 +81,8 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< SEXP >::type stopTrailingIn(stopTrailingInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type profitTargetIn(profitTargetInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type maxDaysIn(maxDaysInSEXP );
-        Rcpp::List __result = processTradesInterface(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn);
+        Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP );
+        Rcpp::List __result = processTradesInterface(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn, tickSize);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

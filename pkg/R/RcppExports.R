@@ -9,12 +9,12 @@ construct.indicator.interface <- function(longEntriesIn, longExitsIn, shortEntri
     .Call('btutils_constructIndicatorInterface', PACKAGE = 'btutils', longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn)
 }
 
-process.trade.interface <- function(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays) {
-    .Call('btutils_processTradeInterface', PACKAGE = 'btutils', opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays)
+process.trade.interface <- function(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize) {
+    .Call('btutils_processTradeInterface', PACKAGE = 'btutils', opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize)
 }
 
-process.trades.interface <- function(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn) {
-    .Call('btutils_processTradesInterface', PACKAGE = 'btutils', ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn)
+process.trades.interface <- function(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn, tickSize) {
+    .Call('btutils_processTradesInterface', PACKAGE = 'btutils', ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn, tickSize)
 }
 
 trades.from.indicator.interface <- function(indicatorIn) {

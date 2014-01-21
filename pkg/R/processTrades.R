@@ -60,7 +60,8 @@ process.trade = function(
                      stop.loss=NA,
                      stop.trailing=NA,
                      profit.target=NA,
-                     max.days=0) {
+                     max.days=0,
+                     tick.size=0.01) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
    tmp = op[,1]
    
@@ -73,7 +74,8 @@ process.trade = function(
                stopLoss=stop.loss,
                stopTrailing=stop.trailing,
                profitTarget=profit.target,
-               maxDays=max.days))
+               maxDays=max.days,
+               tickSize=tick.size))
 }
 
 # trades is a data frame - easier to extract the vectors in R. the format is:
@@ -87,7 +89,7 @@ process.trade = function(
 #     profit.target - a profit targe, NA if none
 #     max.days - maximum days to stay in the trade, less or equal to 0 if none
 # if both stop.loss and stop.trailing are specified, the stop.trailing is used
-process.trades = function(ohlc, trades) {
+process.trades = function(ohlc, trades, tick.size=0.01) {
    # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
    ibeg = ohlc[trades[,1], which.i=T]
    iend = ohlc[trades[,2], which.i=T]
@@ -122,7 +124,8 @@ process.trades = function(ohlc, trades) {
                trades[,4],    # stop loss
                trades[,5],    # stop trailing
                trades[,6],    # profit target
-               trades[,7])    # max days
+               trades[,7],    # max days
+               tick.size)
 
    # print(head(res))
    res = data.frame(res)

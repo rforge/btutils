@@ -32,6 +32,21 @@
 // This needs to be changed if the c++ code is used outside R
 inline bool isNA(double d) { return R_IsNA(d); }
 
+inline double roundAny(double d, double accuracy)
+{
+   return ::round(d/accuracy)*accuracy;
+}
+
+inline double floorAny(double d, double accuracy)
+{
+   return std::floor(d/accuracy)*accuracy;
+}
+
+inline double ceilAny(double d, double accuracy)
+{
+   return std::ceil(d/accuracy)*accuracy;
+}
+
 template <typename T> inline int sign(T t) {
    return (T(0) < t) - (t < T(0));
 }

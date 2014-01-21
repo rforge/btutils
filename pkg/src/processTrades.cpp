@@ -81,6 +81,8 @@ struct TradeLocals {
    double stopTrailing;
    double profitTarget;
    
+   double tickSize;
+   
    bool hasStopLoss;
    bool hasStopTrailing;
    bool hasProfitTarget;
@@ -143,7 +145,8 @@ inline bool processShort(
    // The position is still on, update a trailing stop with the open
    if(locals.hasStopTrailing && op <= locals.minPrice) {
       locals.minPrice = op;
-      locals.stopPrice = locals.minPrice*(1.0 + std::abs(locals.stopTrailing));
+      locals.stopPrice =
+         roundAny(locals.minPrice*(1.0 + std::abs(locals.stopTrailing)), locals.tickSize);
    }
 
    // Process the "internal" part of the bar
@@ -189,7 +192,8 @@ inline bool processShort(
    // The position is still on, update a trailing stop with the low
    if(locals.hasStopTrailing && lo < locals.minPrice) {
       locals.minPrice = lo;
-      locals.stopPrice = locals.minPrice*(1.0 + std::abs(locals.stopTrailing));
+      locals.stopPrice =
+         roundAny(locals.minPrice*(1.0 + std::abs(locals.stopTrailing)), locals.tickSize);
    }
    
    // We have seen the Hi/Low - update min/maxPrice
@@ -278,7 +282,8 @@ inline bool processLong(
    // The position is still on, update a trailing stop with the Open
    if(locals.hasStopTrailing && op > locals.maxPrice) {
       locals.maxPrice = op;
-      locals.stopPrice = locals.maxPrice*(1.0 - std::abs(locals.stopTrailing));
+      locals.stopPrice =
+         roundAny(locals.maxPrice*(1.0 - std::abs(locals.stopTrailing)), locals.tickSize);
    }
 
    // Process the "internal" part of the bar
@@ -324,7 +329,8 @@ inline bool processLong(
    // The position is still on, update a trailing stop with the High
    if(locals.hasStopTrailing && hi > locals.maxPrice) {
       locals.maxPrice = hi;
-      locals.stopPrice = locals.maxPrice*(1.0 - std::abs(locals.stopTrailing));
+      locals.stopPrice =
+         roundAny(locals.maxPrice*(1.0 - std::abs(locals.stopTrailing)), locals.tickSize);
    }
    
    // We have seen the Hi/Low - update min/maxPrice
@@ -358,6 +364,7 @@ void processTrade(
          double stopTrailing,
          double profitTarget,
          int maxDays,
+         double tickSize,
          int & exitIndex,
          double & exitPrice,
          int & exitReason,
@@ -373,6 +380,7 @@ void processTrade(
    locals.hasStopLoss = false;
    locals.hasStopTrailing = false;
    locals.hasProfitTarget = false;
+   locals.tickSize = tickSize;
 
    // Currently positions are initiated only at the close
    locals.minPrice = locals.maxPrice = locals.entryPrice = cl[ibeg];
@@ -382,15 +390,15 @@ void processTrade(
       if(!isNA(stopTrailing)) {
          locals.hasStopTrailing = true;
          locals.stopTrailing = stopTrailing;
-         locals.stopPrice = locals.entryPrice*(1.0 + std::abs(stopTrailing));
+         locals.stopPrice = roundAny(locals.entryPrice*(1.0 + std::abs(stopTrailing)), tickSize);
       } else if(!isNA(stopLoss)) {
          locals.hasStopLoss = true;
          locals.stopLoss = stopLoss;
-         locals.stopPrice = locals.entryPrice*(1.0 + std::abs(stopLoss));
+         locals.stopPrice = roundAny(locals.entryPrice*(1.0 + std::abs(stopLoss)), tickSize);
       }
 
       if(!isNA(profitTarget)) {
-         locals.targetPrice = locals.entryPrice*(1.0 - std::abs(profitTarget));
+         locals.targetPrice = roundAny(locals.entryPrice*(1.0 - std::abs(profitTarget)), tickSize);
          locals.profitTarget = profitTarget;
          locals.hasProfitTarget = true;
       }
@@ -426,17 +434,17 @@ void processTrade(
       if(!isNA(stopTrailing)) {
          locals.hasStopTrailing = true;
          locals.stopTrailing = stopTrailing;
-         locals.stopPrice = locals.entryPrice*(1.0 - std::abs(stopTrailing));
+         locals.stopPrice = roundAny(locals.entryPrice*(1.0 - std::abs(stopTrailing)), tickSize);
       } else if(!isNA(stopLoss)) {
          locals.hasStopLoss = true;
          locals.stopLoss = stopLoss;
-         locals.stopPrice = locals.entryPrice*(1.0 - std::abs(stopLoss));
+         locals.stopPrice = roundAny(locals.entryPrice*(1.0 - std::abs(stopLoss)), tickSize);
       }
 
       if(!isNA(profitTarget)) {
          locals.hasProfitTarget = true;
          locals.profitTarget = profitTarget;
-         locals.targetPrice = locals.entryPrice*(1.0 + std::abs(profitTarget));
+         locals.targetPrice = roundAny(locals.entryPrice*(1.0 + std::abs(profitTarget)), tickSize);
       }
       
       for(ii = ibeg + 1; ii <= iend; ++ii) {
@@ -482,7 +490,8 @@ Rcpp::List processTradeInterface(
                double stopLoss,
                double stopTrailing,
                double profitTarget,
-               int maxDays)
+               int maxDays,
+               double tickSize)
 {
    std::vector<double> op = Rcpp::as< std::vector<double> >(opIn);
    std::vector<double> hi = Rcpp::as< std::vector<double> >(hiIn);
@@ -497,7 +506,7 @@ Rcpp::List processTradeInterface(
    // Call the actuall function to do the work. ibeg and iend are 0 based in cpp and 1 based in R.
    processTrade(
       op, hi, lo, cl,
-      ibeg-1, iend-1, pos, stopLoss, stopTrailing, profitTarget, maxDays,
+      ibeg-1, iend-1, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize,
       exitIndex, exitPrice, exitReason, gain, minPrice, maxPrice, mae, mfe);
    
    // Build and return the result
@@ -524,6 +533,7 @@ void processTrades(
          const std::vector<double> & stopTrailing,
          const std::vector<double> & profitTarget,
          const std::vector<int> & maxDays,
+         double tickSize,
          std::vector<int> & iendOut,
          std::vector<double> & exitPriceOut,
          std::vector<double> & gainOut,
@@ -571,7 +581,7 @@ void processTrades(
 
       processTrade(
             op, hi, lo, cl,
-            ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii], maxDays[ii],
+            ibeg[ii], iend[ii], position[ii], stopLoss[ii], stopTrailing[ii], profitTarget[ii], maxDays[ii], tickSize,
             exitIndex, exitPrice, exitReason, gain, minPrice, maxPrice, mae, mfe);
       // snprintf(buf, sizeof(buf), "%d: exitIndex = %d, exitPrice = %f, exitReason = %d, gain = %f, mae = %f, mfe = %f", 
       //         ii, exitIndex, exitPrice, exitReason, gain, mae, mfe);
@@ -598,7 +608,8 @@ Rcpp::List processTradesInterface(
                      SEXP stopLossIn,
                      SEXP stopTrailingIn,
                      SEXP profitTargetIn,
-                     SEXP maxDaysIn)
+                     SEXP maxDaysIn,
+                     double tickSize)
 {
    DEBUG_MSG("processTradesInterface: entered");
    std::vector<int> ibeg = Rcpp::as< std::vector<int> >( ibegsIn );
@@ -656,7 +667,7 @@ Rcpp::List processTradesInterface(
    // Call the c++ function doing the actual work
    processTrades(
          op, hi, lo, cl,
-         ibeg, iend, position, stopLoss, stopTrailing, profitTarget, maxDays,
+         ibeg, iend, position, stopLoss, stopTrailing, profitTarget, maxDays, tickSize,
          iendOut, exitPrice, gain, minPrice, maxPrice, mae, mfe, reason);
 
    /* Just some values for testing

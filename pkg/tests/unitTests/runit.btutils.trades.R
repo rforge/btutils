@@ -35,7 +35,10 @@ test.process.trade.long = function() {
    
    # 3 - stop limit on low
    checkEqualsNumeric(STOP_LIMIT_ON_LOW, df$exit.reason, "004: Bad exit.reason", tolerance=0)
-   checkEqualsNumeric(-0.01, df$gain, "005: Bad gain")
+   checkEqualsNumeric(-0.01, round(df$gain, 4), "005: Bad gain")
+   checkEqualsNumeric(167.22, df$exit.price, "005a: Bad exit.price")
+   checkEqualsNumeric(167.22, df$min.price, "005a: Bad min.price")
+   checkEqualsNumeric(168.91, df$max.price, "005b: Bad max.price")
    checkEqualsNumeric(5206, df$exit.index, "006: Bad exit.index")
    
    # Add a stop loss which is hit at the open
@@ -71,13 +74,24 @@ test.process.trade.long = function() {
    # Add a profit target which is hit
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, NA, 0.04)
    
+#    print(df$exit.reason)
+#    print(df$exit.index)
+#    print(df$exit.price)
+#    print(df$min.price)
+#    print(df$max.price)
+#    print(df$gain)
+#    print(df$mae)
+#    print(df$mfe)
+   
    # Profit target on High
    checkEqualsNumeric(PROFIT_TARGET_ON_HIGH, df$exit.reason, "018: Bad exit.reason", tolerance=0)
    checkEqualsNumeric(5198, df$exit.index, "019: Bad exit.index", tolerance=0)
-   checkEqualsNumeric(172.6816, df$exit.price, "020: Bad exit.price", tolerance=0.001)
+   checkEqualsNumeric(172.68, df$exit.price, "020: Bad exit.price", tolerance=0)
+   checkEqualsNumeric(166.04, df$min.price, "020a: Bad min.price", tolerance=0)
+   checkEqualsNumeric(172.68, df$max.price, "020b: Bad max.price", tolerance=0)
    checkEqualsNumeric(0.04, round(df$gain, 4), "021: Bad gain")
    checkEqualsNumeric(0, round(df$mae, 4), "022: Bad mae")
-   checkEqualsNumeric(0.04, round(df$mfe, 5), "023: Bad mfe")
+   checkEqualsNumeric(0.04, round(df$mfe, 2), "023: Bad mfe")
    
    # Same profit target together with a trailing stop
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, 0.05, 0.04)
@@ -88,18 +102,12 @@ test.process.trade.long = function() {
    checkEqualsNumeric(172.6816, df$exit.price, "026: Bad exit.price", tolerance=0.001)
    checkEqualsNumeric(0.04, round(df$gain, 4), "027: Bad gain")
    checkEqualsNumeric(0, round(df$mae, 4), "028: Bad mae")
-   checkEqualsNumeric(0.04, round(df$mfe, 5), "029: Bad mfe")
+   checkEqualsNumeric(0.04, round(df$mfe, 2), "029: Bad mfe")
 
    # Increase the profit target together and we hit the trailing stop
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5190, 5225, 1, NA, 0.05, 0.05)
    
-   #    print(df$exit.reason)
-   #    print(df$exit.index)
-   #    print(df$exit.price)
-   #    print(df$gain)
-   #    print(df$mae)
-   #    print(df$mfe)
-   
+
    # Profit target on High
    checkEqualsNumeric(STOP_TRAILING_ON_LOW, df$exit.reason, "024: Bad exit.reason", tolerance=0)
    checkEqualsNumeric(5213, df$exit.index, "030: Bad exit.index", tolerance=0)
@@ -145,7 +153,10 @@ test.process.trade.short = function() {
    # Add a stop loss which is hit at the High
    df = process.trade(Op(drm), Hi(drm), Lo(drm), Cl(drm), 5205, 5225, -1, 0.04)
    checkEqualsNumeric(STOP_LIMIT_ON_HIGH, df$exit.reason, "004: Bad exit.reason", tolerance=0)
-   checkEqualsNumeric(-0.04, df$gain, "005: Bad gain")
+   checkEqualsNumeric(-0.04, round(df$gain, 2), "005: Bad gain")
+   checkEqualsNumeric(175.67, df$exit.price, "005a: Bad exit.price")
+   checkEqualsNumeric(164.53, df$min.price, "005b: Bad min.price")
+   checkEqualsNumeric(175.67, df$max.price, "005c: Bad max.price")
    checkEqualsNumeric(5222, df$exit.index, "006: Bad exit.index")
    
    # Add a stop loss which is hit at the open
@@ -186,7 +197,7 @@ test.process.trade.short = function() {
    # Profit target on Low
    checkEqualsNumeric(PROFIT_TARGET_ON_LOW, df$exit.reason, "024: Bad exit.reason", tolerance=0)
    checkEqualsNumeric(5213, df$exit.index, "025: Bad exit.index", tolerance=0)
-   checkEqualsNumeric(164.5705, round(df$exit.price, 4), "026: Bad exit.price")
+   checkEqualsNumeric(164.57, round(df$exit.price, 2), "026: Bad exit.price")
    checkEqualsNumeric(0.049, round(df$gain, 5), "027: Bad gain")
    checkEqualsNumeric(-0.0032, round(df$mae, 4), "028: Bad mae")
    checkEqualsNumeric(0.049, round(df$mfe, 5), "029: Bad mfe")
