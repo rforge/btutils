@@ -27,3 +27,14 @@
 round.any = function(x, accuracy, f=round) {
    return(f(x/accuracy)*accuracy)
 }
+
+locf = function(v, value=NA, na.rm=F) {
+   if(NROW(dim(v)) == 0) {
+      v[] = locf.interface(v, value)
+   } else {
+      v[] = apply(v, NROW(dim(v)), locf.interface, value=value)
+   }
+
+   if(na.rm) v = na.trim(v, sides="left")
+   return(v)
+}

@@ -25,3 +25,7 @@ filter.returns.interface <- function(returnsIn, ibegIn, iendIn, positionIn) {
     .Call('btutils_filterReturnsInterface', PACKAGE = 'btutils', returnsIn, ibegIn, iendIn, positionIn)
 }
 
+locf.interface <- function(vin, value) {
+    .Call('btutils_locfInterface', PACKAGE = 'btutils', vin, value)
+}
+

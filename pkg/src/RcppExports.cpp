@@ -122,3 +122,19 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// locfInterface
+Rcpp::NumericVector locfInterface(SEXP vin, double value);
+RcppExport SEXP btutils_locfInterface(SEXP vinSEXP, SEXP valueSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
+        Rcpp::traits::input_parameter< double >::type value(valueSEXP );
+        Rcpp::NumericVector __result = locfInterface(vin, value);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
