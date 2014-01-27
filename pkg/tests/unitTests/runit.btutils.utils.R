@@ -21,3 +21,8 @@ test.locf = function() {
       locf(cbind(c(NA, NA, 0, 1, 1, NA, 0), c(NA, 0, 0, NA, 1, 1, 1))),
       cbind(c(NA, NA, 0, 1, 1, 1, 0), c(NA, 0, 0, 0, 1, 1, 1)))
 }
+
+test.leading.nas = function() {
+   checkEqualsNumeric(leading.nas(rep(0, 10)), 0)
+   checkEqualsNumeric(leading.nas(c(NA, rep(0, 10))), 1)
+}

@@ -29,3 +29,15 @@ locf.interface <- function(vin, value) {
     .Call('btutils_locfInterface', PACKAGE = 'btutils', vin, value)
 }
 
+leading.nas.interface <- function(vin) {
+    .Call('btutils_leadingNAs', PACKAGE = 'btutils', vin)
+}
+
+laguerre.filter.interface <- function(vin, gamma) {
+    .Call('btutils_laguerreFilterInterface', PACKAGE = 'btutils', vin, gamma)
+}
+
+laguerre.rsi.interface <- function(vin, gamma) {
+    .Call('btutils_laguerreRSIInterface', PACKAGE = 'btutils', vin, gamma)
+}
+

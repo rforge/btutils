@@ -38,3 +38,19 @@ locf = function(v, value=NA, na.rm=F) {
    if(na.rm) v = na.trim(v, sides="left")
    return(v)
 }
+
+leading.nas = function(x) {
+   return(leading.nas.interface(x))
+}
+
+laguerre.filter = function(x, gamma=0.8) {
+   res = laguerre.filter.interface(x, gamma)
+   res[1:4] = NA
+   return(reclass(res, x))
+}
+
+laguerre.rsi = function(x, gamma=0.8) {
+   res = laguerre.rsi.interface(x, gamma)
+   res[1:4] = NA
+   return(reclass(res, x))
+}

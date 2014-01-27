@@ -138,3 +138,50 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// leadingNAs
+double leadingNAs(SEXP vin);
+RcppExport SEXP btutils_leadingNAs(SEXP vinSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
+        double __result = leadingNAs(vin);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// laguerreFilterInterface
+Rcpp::NumericVector laguerreFilterInterface(SEXP vin, double gamma);
+RcppExport SEXP btutils_laguerreFilterInterface(SEXP vinSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
+        Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP );
+        Rcpp::NumericVector __result = laguerreFilterInterface(vin, gamma);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// laguerreRSIInterface
+Rcpp::NumericVector laguerreRSIInterface(SEXP vin, double gamma);
+RcppExport SEXP btutils_laguerreRSIInterface(SEXP vinSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
+        Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP );
+        Rcpp::NumericVector __result = laguerreRSIInterface(vin, gamma);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
