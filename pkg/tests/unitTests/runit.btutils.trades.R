@@ -240,15 +240,27 @@ test.process.trade.short = function() {
    checkEqualsNumeric(0.0265, round(df$mfe, 4), "047: Bad mfe")
 }
 
-test.filter.returns = function() {
+test.calculate.returns = function() {
    drm.rets = ROC(Cl(drm), n=1, type="discrete")
    drm.macd = MACD(Cl(drm), nFast=1, nSlow=200)[,1]
    drm.indicator = ifelse(drm.macd < 0, 0, 1)
    res1 = na.trim(lag.xts(drm.indicator) * drm.rets)
    
    drm.trades = trades.from.indicator(drm.indicator)
-   res2 = filter.returns(drm.rets, drm.trades)
+   drm.ptrades = process.trades(drm, drm.trades)
+   res2 = calculate.returns(Cl(drm), drm.ptrades)
    
    mm = merge(res1, res2, all=F)
    checkEqualsNumeric(round(mm[,1], 6), round(mm[,2], 6), "001: Results don't match")
+
+   # Add a stop loss column
+   drm.trades = cbind(drm.trades, rep(0.02, NROW(drm.trades)))
+   drm.ptrades = process.trades(drm, drm.trades)
+   res2 = calculate.returns(Cl(drm), drm.ptrades)
+
+   # Verify that some returns on the last trade day
+   # are not the same as the returns for that day.
+   rr = res2[drm.ptrades[,"Exit"]]
+   mm = merge(round(res1, 4), round(rr, 4), all=F)
+   checkTrue(any(mm[,1] != mm[,2]))
 }

@@ -799,34 +799,37 @@ Rcpp::List tradesFromIndicatorInterface(SEXP indicatorIn)
                Rcpp::Named("Position") = Rcpp::IntegerVector(position.begin(), position.end()));
 }
 
-void filterReturns(
-         const std::vector<double> & returns,
+void calculateReturns(
+         const std::vector<double> & cl,
          const std::vector<int> & ibeg,
          const std::vector<int> & iend,
          const std::vector<int> & position,
-         std::vector<double> & result)
+         const std::vector<double> & exitPrice,
+         std::vector<double> & returns)
 {
-   result.resize(0);
-   result.resize(returns.size(), 0.0);
-   for(int ii = 0; ii < ibeg.size(); ++ii)
-   {
-      for(int jj = ibeg[ii] + 1; jj <= iend[ii]; ++jj)
-      {
-         if(!isNA(returns[jj])) {
-            result[jj] = position[ii] * returns[jj];
-         }
+   returns.resize(cl.size(), 0.0);
+
+   // Cycle through the trades
+   for(int ii = 0; ii < ibeg.size(); ++ii) {
+      // Process the last bar of a trade separately - it needs special attention.
+      for(int jj = ibeg[ii] + 1; jj < iend[ii]; ++jj) {
+         returns[jj] = (cl[jj] / cl[jj-1] - 1.0)*position[ii];
       }
+
+      // For the last bar use the exit price
+      returns[iend[ii]] = (exitPrice[ii] / cl[iend[ii]-1] - 1.0)*position[ii];
    }
 }
 
-// [[Rcpp::export("filter.returns.interface")]]
-Rcpp::NumericVector filterReturnsInterface(SEXP returnsIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn)
+// [[Rcpp::export("calculate.returns.interface")]]
+Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP exitPriceIn)
 {
-   // Convert ohlc into std vectors
-   std::vector<double> returns = Rcpp::as< std::vector<double> >(returnsIn);
+   // Convert inputs into std vectors
+   std::vector<double> cl = Rcpp::as< std::vector<double> >(clIn);
    std::vector<int> ibeg = Rcpp::as< std::vector<int> >(ibegIn);
    std::vector<int> iend = Rcpp::as< std::vector<int> >(iendIn);
    std::vector<int> position = Rcpp::as< std::vector<int> >(positionIn);
+   std::vector<double> exitPrice = Rcpp::as< std::vector<double> >(exitPriceIn);
  
    // c++ uses 0 based indexes
    for(int ii = 0; ii < ibeg.size(); ++ii)
@@ -836,7 +839,7 @@ Rcpp::NumericVector filterReturnsInterface(SEXP returnsIn, SEXP ibegIn, SEXP ien
    }
    
    std::vector<double> result;
-   filterReturns(returns, ibeg, iend, position, result);
+   calculateReturns(cl, ibeg, iend, position, exitPrice, result);
 
    return Rcpp::NumericVector(result.begin(), result.end());
 }

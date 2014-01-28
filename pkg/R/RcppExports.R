@@ -21,8 +21,8 @@ trades.from.indicator.interface <- function(indicatorIn) {
     .Call('btutils_tradesFromIndicatorInterface', PACKAGE = 'btutils', indicatorIn)
 }
 
-filter.returns.interface <- function(returnsIn, ibegIn, iendIn, positionIn) {
-    .Call('btutils_filterReturnsInterface', PACKAGE = 'btutils', returnsIn, ibegIn, iendIn, positionIn)
+calculate.returns.interface <- function(clIn, ibegIn, iendIn, positionIn, exitPriceIn) {
+    .Call('btutils_calculateReturnsInterface', PACKAGE = 'btutils', clIn, ibegIn, iendIn, positionIn, exitPriceIn)
 }
 
 locf.interface <- function(vin, value) {

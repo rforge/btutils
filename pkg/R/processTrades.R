@@ -161,10 +161,18 @@ trade.indicator = function(ohlc, indicator, stop.loss=NA, stop.trailing=NA, prof
    return(res)
 }
 
-filter.returns = function(returns, trades) {
-   # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
-   ibeg = returns[trades[,1], which.i=T]
-   iend = returns[trades[,2], which.i=T]
+calculate.returns = function(prices, trades) {
+   prices = prices[,1]
+   
+   # To compute the returns, we need the following columns from the trades data frame:
+   #     * start index
+   #     * end index
+   #     * position
+   #     * exit price
 
-   return(reclass(filter.returns.interface(returns, ibeg, iend, as.integer(trades[,3])), returns))
+   # the lower level c++ interface uses ordinary indexes for the trade's entry and exit
+   ibeg = prices[trades[,1], which.i=T]
+   iend = prices[trades[,2], which.i=T]
+
+   return(reclass(calculate.returns.interface(prices, ibeg, iend, as.integer(trades[,3]), as.numeric(trades[,7])), prices))
 }

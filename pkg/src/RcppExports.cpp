@@ -104,18 +104,19 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// filterReturnsInterface
-Rcpp::NumericVector filterReturnsInterface(SEXP returnsIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn);
-RcppExport SEXP btutils_filterReturnsInterface(SEXP returnsInSEXP, SEXP ibegInSEXP, SEXP iendInSEXP, SEXP positionInSEXP) {
+// calculateReturnsInterface
+Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP exitPriceIn);
+RcppExport SEXP btutils_calculateReturnsInterface(SEXP clInSEXP, SEXP ibegInSEXP, SEXP iendInSEXP, SEXP positionInSEXP, SEXP exitPriceInSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type returnsIn(returnsInSEXP );
+        Rcpp::traits::input_parameter< SEXP >::type clIn(clInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type ibegIn(ibegInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type iendIn(iendInSEXP );
         Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP );
-        Rcpp::NumericVector __result = filterReturnsInterface(returnsIn, ibegIn, iendIn, positionIn);
+        Rcpp::traits::input_parameter< SEXP >::type exitPriceIn(exitPriceInSEXP );
+        Rcpp::NumericVector __result = calculateReturnsInterface(clIn, ibegIn, iendIn, positionIn, exitPriceIn);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
