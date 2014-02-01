@@ -9,6 +9,10 @@ construct.indicator.interface <- function(longEntriesIn, longExitsIn, shortEntri
     .Call('btutils_constructIndicatorInterface', PACKAGE = 'btutils', longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn)
 }
 
+indicator.from.trendline.interface <- function(trendlineIn, thresholdsIn) {
+    .Call('btutils_indicatorFromTrendlineInterface', PACKAGE = 'btutils', trendlineIn, thresholdsIn)
+}
+
 process.trade.interface <- function(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize) {
     .Call('btutils_processTradeInterface', PACKAGE = 'btutils', opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize)
 }

@@ -12,6 +12,7 @@ export(locf)
 export(leading.nas)
 export(laguerre.filter)
 export(laguerre.rsi)
+export(indicator.from.trendline)
 
 export(EXIT_ON_LAST)
 export(STOP_LIMIT_ON_OPEN)

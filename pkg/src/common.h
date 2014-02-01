@@ -29,7 +29,8 @@
 
 #include <Rcpp.h>
 
-// This needs to be changed if the c++ code is used outside R
+// This needs to be changed if the c++ code is used outside R.
+// Is it better to use !R_finite() instead of R_IsNA()?
 inline bool isNA(double d) { return R_IsNA(d); }
 
 inline double roundAny(double d, double accuracy)

@@ -30,3 +30,22 @@ test.cap.trade.duration = function() {
    checkTrue(all(rr$lengths[which(rr$values==1, arr.ind=T)] <= 2, na.rm=T))
    checkTrue(all(rr$lengths[which(rr$values==-1, arr.ind=T)] <= 3, na.rm=T))
 }
+
+test.indicator.from.trendline = function() {
+   trendline = c(1, 2, 3, 2, 3, 1, 2)
+   checkEqualsNumeric(indicator.from.trendline(trendline), c(0, 1, 1, -1, 1, -1, 1), tolerance=0, msg=" *** test 1")
+
+   thresholds = rep(0, NROW(trendline))
+   checkEqualsNumeric(indicator.from.trendline(trendline, thresholds), c(0, 1, 1, -1, 1, -1, 1), tolerance=0, msg=" *** test 2")
+
+   thresholds = rep(1, NROW(trendline))
+   checkEqualsNumeric(indicator.from.trendline(trendline, thresholds), c(0, 1, 1, -1, 1, -1, 1), tolerance=0, msg=" *** test 3")
+
+   thresholds = rep(1.1, NROW(trendline))
+   checkEqualsNumeric(indicator.from.trendline(trendline, thresholds), c(0, 1, 1, 1, 1, -1, -1), tolerance=0, msg=" *** test 4")
+
+   trendline = c(NA, NA, NA, 1, 2, 3, 2, 3, 1, 2)
+   thresholds = rep(1.1, NROW(trendline))
+   # print(indicator.from.trendline(trendline, thresholds))
+   checkEqualsNumeric(indicator.from.trendline(trendline, thresholds), c(0, 0, 0, 0, 1, 1, 1, 1, -1, -1), tolerance=0, msg=" *** test 5")
+}

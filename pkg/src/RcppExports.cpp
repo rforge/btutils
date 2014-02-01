@@ -40,6 +40,22 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// indicatorFromTrendlineInterface
+Rcpp::NumericVector indicatorFromTrendlineInterface(SEXP trendlineIn, SEXP thresholdsIn);
+RcppExport SEXP btutils_indicatorFromTrendlineInterface(SEXP trendlineInSEXP, SEXP thresholdsInSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< SEXP >::type trendlineIn(trendlineInSEXP );
+        Rcpp::traits::input_parameter< SEXP >::type thresholdsIn(thresholdsInSEXP );
+        Rcpp::NumericVector __result = indicatorFromTrendlineInterface(trendlineIn, thresholdsIn);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // processTradeInterface
 Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays, double tickSize);
 RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP, SEXP tickSizeSEXP) {

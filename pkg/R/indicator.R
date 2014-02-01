@@ -31,3 +31,11 @@ cap.trade.duration = function(indicator, short.duration.cap=-1, long.duration.ca
 construct.indicator = function(long.entries, long.exits, short.entries, short.exits) {
    return(reclass(construct.indicator.interface(long.entries, long.exits, short.entries, short.exits), long.entries))
 }
+
+indicator.from.trendline = function(trendline, thresholds) {
+   if(missing(thresholds)) {
+      thresholds = rep(0, NROW(trendline))
+   }
+
+   return(reclass(indicator.from.trendline.interface(trendline, thresholds), trendline))
+}

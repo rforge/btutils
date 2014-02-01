@@ -130,3 +130,70 @@ Rcpp::NumericVector constructIndicatorInterface(SEXP longEntriesIn, SEXP longExi
 
    return Rcpp::NumericVector(indicator.begin(), indicator.end());
 }
+
+void indicatorFromTrendline(const std::vector<double> & trendline, const std::vector<double> & thresholds, std::vector<int> & indicator)
+{
+   indicator.resize(trendline.size(), 0);
+
+   int ii = 0;
+   while(ii < trendline.size() && (isNA(trendline[ii]) || isNA(thresholds[ii]))) {
+      ++ii;
+   }
+
+   ++ii;
+
+   if(ii >= trendline.size()) return;
+
+   int id = ii;
+   int direction = sign(trendline[ii] - trendline[ii-1]);
+   double threshold = trendline[ii] - thresholds[ii]*direction;
+   indicator[ii] = direction;
+   for(++ii; ii < trendline.size(); ++ii) {
+      if(direction == -1) {
+         if(trendline[ii] <= trendline[id]) {
+            // A new minimum, reset
+            id = ii;
+            threshold = trendline[ii] + thresholds[ii];
+         } else if(trendline[ii] >= threshold) {
+            // Trend reversal
+            id = ii;
+            threshold = trendline[ii] - thresholds[ii];
+            direction = 1;
+         }
+      } else if(direction == 1) {
+         if(trendline[ii] >= trendline[id]) {
+            // A new maximum, reset
+            id = ii;
+            threshold = trendline[ii] - thresholds[ii];
+         } else if(trendline[ii] <= threshold) {
+            // Trend reversal
+            id = ii;
+            threshold = trendline[ii] + thresholds[ii];
+            direction = -1;
+         }
+      } else {
+         if(trendline[ii] > trendline[ii-1]) {
+            id = ii;
+            direction = 1;
+            threshold = trendline[ii] - thresholds[ii];
+         } else if(trendline[ii] < trendline[ii-1]) {
+            id = ii;
+            direction = -1;
+            threshold = trendline[ii] + thresholds[ii];
+         }
+      }
+      indicator[ii] = direction;
+   }
+}
+
+// [[Rcpp::export("indicator.from.trendline.interface")]]
+Rcpp::NumericVector indicatorFromTrendlineInterface(SEXP trendlineIn, SEXP thresholdsIn)
+{
+   std::vector<double> trendline = Rcpp::as<std::vector<double> >(trendlineIn);
+   std::vector<double> thresholds  = Rcpp::as<std::vector<double> >(thresholdsIn);
+   
+   std::vector<int> indicator;
+   indicatorFromTrendline(trendline, thresholds, indicator);
+
+   return Rcpp::NumericVector(indicator.begin(), indicator.end());
+}
