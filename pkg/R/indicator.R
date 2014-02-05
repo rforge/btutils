@@ -24,8 +24,14 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cap.trade.duration = function(indicator, short.duration.cap=-1, long.duration.cap=-1) {
-   return(reclass(cap.trade.duration.interface(indicator, short.duration.cap, long.duration.cap), indicator))
+cap.trade.duration = function(
+                        indicator,
+                        short.min.cap=-1, long.min.cap=-1, 
+                        short.max.cap=-1, long.max.cap=-1,
+                        wait.new.signal=TRUE) {
+   stopifnot(short.min.cap == -1 || short.max.cap == -1 || (short.max.cap >= short.min.cap))
+   stopifnot(long.min.cap == -1 || long.max.cap == -1 || (long.max.cap >= long.min.cap))
+   return(reclass(cap.trade.duration.interface(indicator, short.min.cap, long.min.cap, short.max.cap, long.max.cap, wait.new.signal), indicator))
 }
 
 construct.indicator = function(long.entries, long.exits, short.entries, short.exits) {

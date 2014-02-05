@@ -29,9 +29,15 @@
 
 using namespace Rcpp;
 
-void capTradeDuration(std::vector<double> & indicator, int shortDurationCap, int longDurationCap)
+void capTradeDuration(
+         std::vector<double> & indicator,
+         int shortMinCap,
+         int longMinCap,
+         int shortMaxCap,
+         int longMaxCap,
+         bool waitNewSignal)
 {
-   if(shortDurationCap < 0 && longDurationCap < 0) return;
+   if(shortMaxCap < 0 && longMaxCap < 0 && shortMinCap < 0 && longMinCap < 0) return;
 
    std::vector<double>::size_type ii = 0;
 
@@ -46,24 +52,50 @@ void capTradeDuration(std::vector<double> & indicator, int shortDurationCap, int
       
       // Apply caps to this position
       int ss = sign(indicator[ii]);
-      int cap;
-      if(ss == -1 && shortDurationCap >= 0) {
-         cap = shortDurationCap;
-      } else if(ss == 1 && longDurationCap >= 0) {
-         cap = longDurationCap;
-      } else {
-         cap = -1;
+      int minCap, maxCap;
+      if(ss == -1) {
+         minCap = shortMinCap;
+         maxCap = shortMaxCap;
+      } else if(ss == 1) {
+         minCap = longMinCap;
+         maxCap = longMaxCap;
       }
 
-      if(cap != -1) {
+      if(minCap != -1 || maxCap != -1) {
          int daysIn = 1;
-         while(ii < indicator.size() && sign(indicator[ii]) == ss) {
-            if(daysIn > cap) {
-               indicator[ii] = 0;
-            }
-            
+         bool done = false;
+         int prevIndSign = -10;  // An impossible value if we are satisfying minCap
+         while(ii < indicator.size() && daysIn <= minCap) {
+            int indSign = sign(indicator[ii]);
+
+            // Remember that the position changed, thus, we are done once minCap is satisfied
+            if(!done && indSign != ss) done = true;
+
+            // Remember the original indicator value before we overwrite it. Also
+            // notice, that when we can only extend the indicator with 1 or -1.
+            prevIndSign = indSign;
+            if(indSign != ss) indicator[ii] = ss;
+
             ++daysIn;
             ++ii;
+         }
+
+         if(done && waitNewSignal) {
+            // We have satisfied minCap and we need to wait for a new signal
+            while(ii < indicator.size() && sign(indicator[ii]) == prevIndSign ) {
+               indicator[ii] = 0;
+               ++ii;
+            }
+         }
+
+         if(!done || !waitNewSignal) {
+            while(ii < indicator.size() && sign(indicator[ii]) == ss) {
+               // Update the indicator if duration is over maxCap
+               if(maxCap > -1 && daysIn > maxCap) indicator[ii] = 0;
+               
+               ++daysIn;
+               ++ii;
+            }
          }
       } else {
          while(ii < indicator.size() && sign(indicator[ii]) == ss) ++ii;
@@ -72,11 +104,23 @@ void capTradeDuration(std::vector<double> & indicator, int shortDurationCap, int
 }
 
 // [[Rcpp::export("cap.trade.duration.interface")]]
-Rcpp::NumericVector capTradeDurationInterface(SEXP indicatorIn, int shortDurationCap, int longDurationCap)
+Rcpp::NumericVector capTradeDurationInterface(
+                        SEXP indicatorIn,
+                        int shortMinCap,
+                        int longMinCap,
+                        int shortMaxCap,
+                        int longMaxCap,
+                        bool waitNewSignal)
 {
    // Convert ohlc into std vectors
    std::vector<double> indicator = Rcpp::as< std::vector<double> >(indicatorIn);
-   capTradeDuration(indicator, shortDurationCap, longDurationCap);
+   capTradeDuration(
+         indicator,
+         shortMinCap,
+         longMinCap,
+         shortMaxCap,
+         longMaxCap,
+         waitNewSignal);
 
    return Rcpp::NumericVector(indicator.begin(), indicator.end());
 }

@@ -162,7 +162,9 @@ trade.indicator = function(ohlc, indicator, stop.loss=NA, stop.trailing=NA, prof
 }
 
 calculate.returns = function(prices, trades) {
-   prices = prices[,1]
+
+   # It's a common mistake to call calculate.returns with ohlc, don't "fix" it
+   stopifnot(NCOL(prices) == 1)
    
    # To compute the returns, we need the following columns from the trades data frame:
    #     * start index

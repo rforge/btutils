@@ -6,16 +6,19 @@
 using namespace Rcpp;
 
 // capTradeDurationInterface
-Rcpp::NumericVector capTradeDurationInterface(SEXP indicatorIn, int shortDurationCap, int longDurationCap);
-RcppExport SEXP btutils_capTradeDurationInterface(SEXP indicatorInSEXP, SEXP shortDurationCapSEXP, SEXP longDurationCapSEXP) {
+Rcpp::NumericVector capTradeDurationInterface(SEXP indicatorIn, int shortMinCap, int longMinCap, int shortMaxCap, int longMaxCap, bool waitNewSignal);
+RcppExport SEXP btutils_capTradeDurationInterface(SEXP indicatorInSEXP, SEXP shortMinCapSEXP, SEXP longMinCapSEXP, SEXP shortMaxCapSEXP, SEXP longMaxCapSEXP, SEXP waitNewSignalSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP );
-        Rcpp::traits::input_parameter< int >::type shortDurationCap(shortDurationCapSEXP );
-        Rcpp::traits::input_parameter< int >::type longDurationCap(longDurationCapSEXP );
-        Rcpp::NumericVector __result = capTradeDurationInterface(indicatorIn, shortDurationCap, longDurationCap);
+        Rcpp::traits::input_parameter< int >::type shortMinCap(shortMinCapSEXP );
+        Rcpp::traits::input_parameter< int >::type longMinCap(longMinCapSEXP );
+        Rcpp::traits::input_parameter< int >::type shortMaxCap(shortMaxCapSEXP );
+        Rcpp::traits::input_parameter< int >::type longMaxCap(longMaxCapSEXP );
+        Rcpp::traits::input_parameter< bool >::type waitNewSignal(waitNewSignalSEXP );
+        Rcpp::NumericVector __result = capTradeDurationInterface(indicatorIn, shortMinCap, longMinCap, shortMaxCap, longMaxCap, waitNewSignal);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
