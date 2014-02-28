@@ -570,7 +570,7 @@ void processTrades(
    exitReasonOut.resize(0);
    exitReasonOut.reserve(ibeg.size());
 
-   for(int ii = 0; ii < ibeg.size(); ++ii )
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii )
    {
       double exitPrice, minPrice, maxPrice;
       double gain;
@@ -648,7 +648,7 @@ Rcpp::List processTradesInterface(
 
    // vectors in c++ are zero based and in R are one based. convert
    // to the c++ format before calling the workhorse function.
-   for(int ii = 0; ii < ibeg.size(); ++ii)
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii)
    {
       ibeg[ii] -= 1;
       iend[ii] -= 1;
@@ -684,7 +684,7 @@ Rcpp::List processTradesInterface(
 
    // vectors in c++ are zero based and in R are one based.
    // convert to the R format on the way out.
-   for(int ii = 0; ii < ibeg.size(); ++ii )
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii )
    {
       ibeg[ii] += 1;
       iend[ii] += 1;
@@ -787,7 +787,7 @@ Rcpp::List tradesFromIndicatorInterface(SEXP indicatorIn)
    
    // vectors in c++ are zero based and in R are one based.
    // convert to the R format on the way out.
-   for(int ii = 0; ii < ibeg.size(); ++ii)
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii)
    {
       ++ibeg[ii];
       ++iend[ii];
@@ -810,7 +810,7 @@ void calculateReturns(
    returns.resize(cl.size(), 0.0);
 
    // Cycle through the trades
-   for(int ii = 0; ii < ibeg.size(); ++ii) {
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii) {
       // Process the last bar of a trade separately - it needs special attention.
       for(int jj = ibeg[ii] + 1; jj < iend[ii]; ++jj) {
          returns[jj] = (cl[jj] / cl[jj-1] - 1.0)*position[ii];
@@ -832,7 +832,7 @@ Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendI
    std::vector<double> exitPrice = Rcpp::as< std::vector<double> >(exitPriceIn);
  
    // c++ uses 0 based indexes
-   for(int ii = 0; ii < ibeg.size(); ++ii)
+   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii)
    {
       ibeg[ii] -= 1;
       iend[ii] -= 1;

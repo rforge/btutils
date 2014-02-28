@@ -32,12 +32,12 @@ using namespace Rcpp;
 
 void locf(std::vector<double> & v, double value) {
    if(!isNA(value)) {
-      for(int ii = 1; ii < v.size(); ++ii) {
+      for(std::vector<double>::size_type ii = 1; ii < v.size(); ++ii) {
          if(!isNA(v[ii-1]) && v[ii] == value) v[ii] = v[ii-1];
       }
    } else {
       // na.locf behaviour
-      for(int ii = 1; ii < v.size(); ++ii) {
+      for(std::vector<double>::size_type ii = 1; ii < v.size(); ++ii) {
          if(isNA(v[ii]) && !isNA(v[ii-1])) v[ii] = v[ii-1];
       }
    }
@@ -56,7 +56,7 @@ Rcpp::NumericVector locfInterface(SEXP vin, double value)
 double leadingNAs(SEXP vin)
 {
    std::vector<double> v = Rcpp::as< std::vector<double> >(vin);
-   int ii = 0;
+   std::vector<double>::size_type ii = 0;
    while(ii < v.size() && isNA(v[ii])) ++ii;
 
    return ii;
@@ -75,14 +75,14 @@ void laguerreFilter(const std::vector<double> & prices, double gamma, std::vecto
    for(int jj = 2; jj < 4; ++jj) l1[jj] = -gamma*l0[jj] + l0[jj-1] + gamma*l1[jj-1];
    l2[3] = -gamma*l1[3] + l1[2] + gamma*l2[2];
    
-   for(int jj = 4; jj < prices.size(); ++jj) {
+   for(std::vector<double>::size_type jj = 4; jj < prices.size(); ++jj) {
       l0[jj] = (1.0 - gamma)*prices[jj] + gamma*l0[jj-1];
       l1[jj] = -gamma*l0[jj] + l0[jj-1] + gamma*l1[jj-1];
       l2[jj] = -gamma*l1[jj] + l1[jj-1] + gamma*l2[jj-1];
       l3[jj] = -gamma*l2[jj] + l2[jj-1] + gamma*l3[jj-1];
    }
    
-   for(int jj = 0; jj < prices.size(); ++jj) out[jj] = (l0[jj] + 2.0*l1[jj] + 2.0*l2[jj] + l3[jj]) / 6.0;
+   for(std::vector<double>::size_type jj = 0; jj < prices.size(); ++jj) out[jj] = (l0[jj] + 2.0*l1[jj] + 2.0*l2[jj] + l3[jj]) / 6.0;
 }
 
 // [[Rcpp::export("laguerre.filter.interface")]]
@@ -109,14 +109,14 @@ void laguerreRSI(const std::vector<double> & prices, double gamma, std::vector<d
    for(int jj = 2; jj < 4; ++jj) l1[jj] = -gamma*l0[jj] + l0[jj-1] + gamma*l1[jj-1];
    l2[3] = -gamma*l1[3] + l1[2] + gamma*l2[2];
    
-   for(int jj = 4; jj < prices.size(); ++jj) {
+   for(std::vector<double>::size_type jj = 4; jj < prices.size(); ++jj) {
       l0[jj] = (1.0 - gamma)*prices[jj] + gamma*l0[jj-1];
       l1[jj] = -gamma*l0[jj] + l0[jj-1] + gamma*l1[jj-1];
       l2[jj] = -gamma*l1[jj] + l1[jj-1] + gamma*l2[jj-1];
       l3[jj] = -gamma*l2[jj] + l2[jj-1] + gamma*l3[jj-1];
    }
    
-   for(int jj = 0; jj < prices.size(); ++jj) {
+   for(std::vector<double>::size_type jj = 0; jj < prices.size(); ++jj) {
       double cu = 0.0;
       double cd = 0.0;
 

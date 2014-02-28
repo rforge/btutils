@@ -134,7 +134,7 @@ void constructIndicator(
 {
    indicator.resize(longEntries.size(), 0.0);
 
-   int ii = 0;
+   std::vector<double>::size_type ii = 0;
 
    while(ii < indicator.size() && !longEntries[ii] && !shortEntries[ii]) ++ii;
 
@@ -179,7 +179,7 @@ void indicatorFromTrendline(const std::vector<double> & trendline, const std::ve
 {
    indicator.resize(trendline.size(), 0);
 
-   int ii = 0;
+   std::vector<double>::size_type ii = 0;
    while(ii < trendline.size() && (isNA(trendline[ii]) || isNA(thresholds[ii]))) {
       ++ii;
    }
