@@ -45,5 +45,5 @@ spy.indicator = ifelse(spy.macd < 0, 0, 1)
 
 spy.trades = trade.indicator(OHLC(spy), spy.indicator, stop.loss=0.02)
 spy.rets = ROC(Cl(spy), n=1, type="discrete")
-ec = filter.returns(spy.rets, spy.trades)
+ec = calculate.returns(spy.rets, spy.trades)
 }
