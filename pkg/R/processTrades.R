@@ -161,7 +161,7 @@ trade.indicator = function(ohlc, indicator, stop.loss=NA, stop.trailing=NA, prof
    return(res)
 }
 
-calculate.returns = function(prices, trades) {
+calculate.returns = function(prices, trades, in.dollars=FALSE) {
 
    # It's a common mistake to call calculate.returns with ohlc, don't "fix" it
    stopifnot(NCOL(prices) == 1)
@@ -176,5 +176,5 @@ calculate.returns = function(prices, trades) {
    ibeg = prices[trades[,1], which.i=T]
    iend = prices[trades[,2], which.i=T]
 
-   return(reclass(calculate.returns.interface(prices, ibeg, iend, as.integer(trades[,3]), as.numeric(trades[,7])), prices))
+   return(reclass(calculate.returns.interface(prices, ibeg, iend, as.integer(trades[,3]), as.numeric(trades[,7]), in.dollars), prices))
 }

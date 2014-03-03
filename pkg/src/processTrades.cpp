@@ -805,24 +805,44 @@ void calculateReturns(
          const std::vector<int> & iend,
          const std::vector<int> & position,
          const std::vector<double> & exitPrice,
+         bool inDollars,
          std::vector<double> & returns)
 {
    returns.resize(cl.size(), 0.0);
 
-   // Cycle through the trades
-   for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii) {
-      // Process the last bar of a trade separately - it needs special attention.
-      for(int jj = ibeg[ii] + 1; jj < iend[ii]; ++jj) {
-         returns[jj] = (cl[jj] / cl[jj-1] - 1.0)*position[ii];
+   if(!inDollars) {
+      // Cycle through the trades
+      for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii) {
+         // Process the last bar of a trade separately - it needs special attention.
+         for(int jj = ibeg[ii] + 1; jj < iend[ii]; ++jj) {
+            returns[jj] = (cl[jj] / cl[jj-1] - 1.0)*position[ii];
+         }
+   
+         // For the last bar use the exit price
+         returns[iend[ii]] = (exitPrice[ii] / cl[iend[ii]-1] - 1.0)*position[ii];
       }
-
-      // For the last bar use the exit price
-      returns[iend[ii]] = (exitPrice[ii] / cl[iend[ii]-1] - 1.0)*position[ii];
+   } else {
+      // Calculate the returns in dollars - useful for trading futures.
+      for(std::vector<int>::size_type ii = 0; ii < ibeg.size(); ++ii) {
+         // Process the last bar of a trade separately - it needs special attention.
+         for(int jj = ibeg[ii] + 1; jj < iend[ii]; ++jj) {
+            returns[jj] = (cl[jj] - cl[jj-1])*position[ii];
+         }
+   
+         // For the last bar use the exit price
+         returns[iend[ii]] = (exitPrice[ii] - cl[iend[ii]-1])*position[ii];
+      }
    }
 }
 
 // [[Rcpp::export("calculate.returns.interface")]]
-Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP exitPriceIn)
+Rcpp::NumericVector calculateReturnsInterface(
+                        SEXP clIn,
+                        SEXP ibegIn,
+                        SEXP iendIn,
+                        SEXP positionIn,
+                        SEXP exitPriceIn,
+                        bool inDollars)
 {
    // Convert inputs into std vectors
    std::vector<double> cl = Rcpp::as< std::vector<double> >(clIn);
@@ -839,7 +859,7 @@ Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendI
    }
    
    std::vector<double> result;
-   calculateReturns(cl, ibeg, iend, position, exitPrice, result);
+   calculateReturns(cl, ibeg, iend, position, exitPrice, inDollars, result);
 
    return Rcpp::NumericVector(result.begin(), result.end());
 }
