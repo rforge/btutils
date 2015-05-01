@@ -28,3 +28,5 @@ export(PROFIT_TARGET_ON_HIGH)
 export(PROFIT_TARGET_ON_LOW)
 export(PROFIT_TARGET_ON_CLOSE)
 export(MAX_DAYS_LIMIT)
+
+export(YahooDb)

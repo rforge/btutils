@@ -9,200 +9,156 @@ using namespace Rcpp;
 Rcpp::NumericVector capTradeDurationInterface(SEXP indicatorIn, int shortMinCap, int longMinCap, int shortMaxCap, int longMaxCap, bool waitNewSignal);
 RcppExport SEXP btutils_capTradeDurationInterface(SEXP indicatorInSEXP, SEXP shortMinCapSEXP, SEXP longMinCapSEXP, SEXP shortMaxCapSEXP, SEXP longMaxCapSEXP, SEXP waitNewSignalSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP );
-        Rcpp::traits::input_parameter< int >::type shortMinCap(shortMinCapSEXP );
-        Rcpp::traits::input_parameter< int >::type longMinCap(longMinCapSEXP );
-        Rcpp::traits::input_parameter< int >::type shortMaxCap(shortMaxCapSEXP );
-        Rcpp::traits::input_parameter< int >::type longMaxCap(longMaxCapSEXP );
-        Rcpp::traits::input_parameter< bool >::type waitNewSignal(waitNewSignalSEXP );
-        Rcpp::NumericVector __result = capTradeDurationInterface(indicatorIn, shortMinCap, longMinCap, shortMaxCap, longMaxCap, waitNewSignal);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP);
+    Rcpp::traits::input_parameter< int >::type shortMinCap(shortMinCapSEXP);
+    Rcpp::traits::input_parameter< int >::type longMinCap(longMinCapSEXP);
+    Rcpp::traits::input_parameter< int >::type shortMaxCap(shortMaxCapSEXP);
+    Rcpp::traits::input_parameter< int >::type longMaxCap(longMaxCapSEXP);
+    Rcpp::traits::input_parameter< bool >::type waitNewSignal(waitNewSignalSEXP);
+    __result = Rcpp::wrap(capTradeDurationInterface(indicatorIn, shortMinCap, longMinCap, shortMaxCap, longMaxCap, waitNewSignal));
+    return __result;
 END_RCPP
 }
 // constructIndicatorInterface
 Rcpp::NumericVector constructIndicatorInterface(SEXP longEntriesIn, SEXP longExitsIn, SEXP shortEntriesIn, SEXP shortExitsIn);
 RcppExport SEXP btutils_constructIndicatorInterface(SEXP longEntriesInSEXP, SEXP longExitsInSEXP, SEXP shortEntriesInSEXP, SEXP shortExitsInSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type longEntriesIn(longEntriesInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type longExitsIn(longExitsInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type shortEntriesIn(shortEntriesInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type shortExitsIn(shortExitsInSEXP );
-        Rcpp::NumericVector __result = constructIndicatorInterface(longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type longEntriesIn(longEntriesInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type longExitsIn(longExitsInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type shortEntriesIn(shortEntriesInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type shortExitsIn(shortExitsInSEXP);
+    __result = Rcpp::wrap(constructIndicatorInterface(longEntriesIn, longExitsIn, shortEntriesIn, shortExitsIn));
+    return __result;
 END_RCPP
 }
 // indicatorFromTrendlineInterface
 Rcpp::NumericVector indicatorFromTrendlineInterface(SEXP trendlineIn, SEXP thresholdsIn);
 RcppExport SEXP btutils_indicatorFromTrendlineInterface(SEXP trendlineInSEXP, SEXP thresholdsInSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type trendlineIn(trendlineInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type thresholdsIn(thresholdsInSEXP );
-        Rcpp::NumericVector __result = indicatorFromTrendlineInterface(trendlineIn, thresholdsIn);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type trendlineIn(trendlineInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type thresholdsIn(thresholdsInSEXP);
+    __result = Rcpp::wrap(indicatorFromTrendlineInterface(trendlineIn, thresholdsIn));
+    return __result;
 END_RCPP
 }
 // processTradeInterface
 Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays, double tickSize);
 RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP, SEXP tickSizeSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type opIn(opInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type hiIn(hiInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type loIn(loInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type clIn(clInSEXP );
-        Rcpp::traits::input_parameter< int >::type ibeg(ibegSEXP );
-        Rcpp::traits::input_parameter< int >::type iend(iendSEXP );
-        Rcpp::traits::input_parameter< int >::type pos(posSEXP );
-        Rcpp::traits::input_parameter< double >::type stopLoss(stopLossSEXP );
-        Rcpp::traits::input_parameter< double >::type stopTrailing(stopTrailingSEXP );
-        Rcpp::traits::input_parameter< double >::type profitTarget(profitTargetSEXP );
-        Rcpp::traits::input_parameter< int >::type maxDays(maxDaysSEXP );
-        Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP );
-        Rcpp::List __result = processTradeInterface(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type opIn(opInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type hiIn(hiInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type loIn(loInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type clIn(clInSEXP);
+    Rcpp::traits::input_parameter< int >::type ibeg(ibegSEXP);
+    Rcpp::traits::input_parameter< int >::type iend(iendSEXP);
+    Rcpp::traits::input_parameter< int >::type pos(posSEXP);
+    Rcpp::traits::input_parameter< double >::type stopLoss(stopLossSEXP);
+    Rcpp::traits::input_parameter< double >::type stopTrailing(stopTrailingSEXP);
+    Rcpp::traits::input_parameter< double >::type profitTarget(profitTargetSEXP);
+    Rcpp::traits::input_parameter< int >::type maxDays(maxDaysSEXP);
+    Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP);
+    __result = Rcpp::wrap(processTradeInterface(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize));
+    return __result;
 END_RCPP
 }
 // processTradesInterface
 Rcpp::List processTradesInterface(SEXP ohlcIn, SEXP ibegsIn, SEXP iendsIn, SEXP positionIn, SEXP stopLossIn, SEXP stopTrailingIn, SEXP profitTargetIn, SEXP maxDaysIn, double tickSize);
 RcppExport SEXP btutils_processTradesInterface(SEXP ohlcInSEXP, SEXP ibegsInSEXP, SEXP iendsInSEXP, SEXP positionInSEXP, SEXP stopLossInSEXP, SEXP stopTrailingInSEXP, SEXP profitTargetInSEXP, SEXP maxDaysInSEXP, SEXP tickSizeSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type ohlcIn(ohlcInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type ibegsIn(ibegsInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type iendsIn(iendsInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type stopLossIn(stopLossInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type stopTrailingIn(stopTrailingInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type profitTargetIn(profitTargetInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type maxDaysIn(maxDaysInSEXP );
-        Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP );
-        Rcpp::List __result = processTradesInterface(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn, tickSize);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type ohlcIn(ohlcInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type ibegsIn(ibegsInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type iendsIn(iendsInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type stopLossIn(stopLossInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type stopTrailingIn(stopTrailingInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type profitTargetIn(profitTargetInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type maxDaysIn(maxDaysInSEXP);
+    Rcpp::traits::input_parameter< double >::type tickSize(tickSizeSEXP);
+    __result = Rcpp::wrap(processTradesInterface(ohlcIn, ibegsIn, iendsIn, positionIn, stopLossIn, stopTrailingIn, profitTargetIn, maxDaysIn, tickSize));
+    return __result;
 END_RCPP
 }
 // tradesFromIndicatorInterface
 Rcpp::List tradesFromIndicatorInterface(SEXP indicatorIn);
 RcppExport SEXP btutils_tradesFromIndicatorInterface(SEXP indicatorInSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP );
-        Rcpp::List __result = tradesFromIndicatorInterface(indicatorIn);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type indicatorIn(indicatorInSEXP);
+    __result = Rcpp::wrap(tradesFromIndicatorInterface(indicatorIn));
+    return __result;
 END_RCPP
 }
 // calculateReturnsInterface
 Rcpp::NumericVector calculateReturnsInterface(SEXP clIn, SEXP ibegIn, SEXP iendIn, SEXP positionIn, SEXP exitPriceIn, bool inDollars);
 RcppExport SEXP btutils_calculateReturnsInterface(SEXP clInSEXP, SEXP ibegInSEXP, SEXP iendInSEXP, SEXP positionInSEXP, SEXP exitPriceInSEXP, SEXP inDollarsSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type clIn(clInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type ibegIn(ibegInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type iendIn(iendInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type exitPriceIn(exitPriceInSEXP );
-        Rcpp::traits::input_parameter< bool >::type inDollars(inDollarsSEXP );
-        Rcpp::NumericVector __result = calculateReturnsInterface(clIn, ibegIn, iendIn, positionIn, exitPriceIn, inDollars);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type clIn(clInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type ibegIn(ibegInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type iendIn(iendInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type positionIn(positionInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type exitPriceIn(exitPriceInSEXP);
+    Rcpp::traits::input_parameter< bool >::type inDollars(inDollarsSEXP);
+    __result = Rcpp::wrap(calculateReturnsInterface(clIn, ibegIn, iendIn, positionIn, exitPriceIn, inDollars));
+    return __result;
 END_RCPP
 }
 // locfInterface
 Rcpp::NumericVector locfInterface(SEXP vin, double value);
 RcppExport SEXP btutils_locfInterface(SEXP vinSEXP, SEXP valueSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
-        Rcpp::traits::input_parameter< double >::type value(valueSEXP );
-        Rcpp::NumericVector __result = locfInterface(vin, value);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP);
+    Rcpp::traits::input_parameter< double >::type value(valueSEXP);
+    __result = Rcpp::wrap(locfInterface(vin, value));
+    return __result;
 END_RCPP
 }
 // leadingNAs
 double leadingNAs(SEXP vin);
 RcppExport SEXP btutils_leadingNAs(SEXP vinSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
-        double __result = leadingNAs(vin);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP);
+    __result = Rcpp::wrap(leadingNAs(vin));
+    return __result;
 END_RCPP
 }
 // laguerreFilterInterface
 Rcpp::NumericVector laguerreFilterInterface(SEXP vin, double gamma);
 RcppExport SEXP btutils_laguerreFilterInterface(SEXP vinSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
-        Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP );
-        Rcpp::NumericVector __result = laguerreFilterInterface(vin, gamma);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    __result = Rcpp::wrap(laguerreFilterInterface(vin, gamma));
+    return __result;
 END_RCPP
 }
 // laguerreRSIInterface
 Rcpp::NumericVector laguerreRSIInterface(SEXP vin, double gamma);
 RcppExport SEXP btutils_laguerreRSIInterface(SEXP vinSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP );
-        Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP );
-        Rcpp::NumericVector __result = laguerreRSIInterface(vin, gamma);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type vin(vinSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    __result = Rcpp::wrap(laguerreRSIInterface(vin, gamma));
+    return __result;
 END_RCPP
 }
