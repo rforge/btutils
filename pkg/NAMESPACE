@@ -30,3 +30,6 @@ export(PROFIT_TARGET_ON_CLOSE)
 export(MAX_DAYS_LIMIT)
 
 export(YahooDb)
+
+export(zig.zag)
+export(returns.rsi)

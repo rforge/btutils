@@ -1,4 +1,5 @@
 require(R6)
+require(quantmod)
 
 # Db interface
 YahooDb = R6Class("YahooDb",
@@ -22,12 +23,12 @@ YahooDb = R6Class("YahooDb",
          if(!force) {
             # Try the database first
             rs = dbGetQuery(
-               connection,
-               paste(
-                  " select date, open, high, low, close, volume, adjusted from bars ",
-                  " where symbol = '", db.symbol, "'",
-                  " order by date",
-                  sep=""))
+                     connection,
+                     paste(
+                        " select date, open, high, low, close, volume, adjusted from bars ",
+                        " where symbol = '", db.symbol, "'",
+                        " order by date",
+                        sep=""))
             if(NROW(rs) == 0) {
                rs = NULL
             } else {
@@ -42,7 +43,7 @@ YahooDb = R6Class("YahooDb",
             ss = getSymbols(symbol, from="1900-01-01", auto.assign=F)
             ss = adjustOHLC(ss, use.Adjusted=F, adjust="split", symbol.name=symbol)
             colnames(ss) = private$col.names
-            df = cbind(data.frame(symbol=db.symbol), index(ss), data.frame(ss))
+            df = cbind(data.frame(symbol=db.symbol), as.character(index(ss)), data.frame(ss))
             colnames(df) = c("symbol","date",private$col.names)
             dbBegin(connection)
             query = paste("delete from bars where symbol='", symbol, "'", sep="")
@@ -75,6 +76,8 @@ YahooDb = R6Class("YahooDb",
          
          driver = SQLite()
          connection = dbConnect(driver, dbname=private$path)
+         
+         symbols = toupper(symbols)
          
          # Leading '^' (used for indexes, like ^DJI) is dropped when
          # quantmod constructs the variable name
@@ -112,12 +115,13 @@ YahooDb = R6Class("YahooDb",
             for(ss in ls(env)) {
                # Adjust only for splits
                env[[ss]] = adjustOHLC(env[[ss]], use.Adjusted=F, adjust="split", symbol.name=symbols[as.numeric(match(ss, db.names))])
+               colnames(env[[ss]]) = private$col.names
                
                # Store into the database
-               df = cbind(data.frame(symbol=ss), index(env[[ss]]), data.frame(env[[ss]]))
+               df = cbind(data.frame(symbol=ss), as.character(index(env[[ss]])), data.frame(env[[ss]]))
                colnames(df) = c("symbol","date",private$col.names)
                
-               query = paste("delete from bars where symbol='", symbol, "'", sep="")
+               query = paste("delete from bars where symbol='", ss, "'", sep="")
                dbSendQuery(connection, query)
                query = paste(" insert or replace into bars (symbol,date,open,high,low,close,volume,adjusted) ",
                              "   values(@symbol,@date,@open,@high,@low,@close,@volume,@adjusted)",
@@ -144,6 +148,16 @@ YahooDb = R6Class("YahooDb",
          }
          
          dbDisconnect(connection)
+      },
+
+      # Shortcuts
+      g = function(symbol, force=F) {
+         return(self$get.symbol(symbol, force))
+      },
+      
+      
+      gs = function(symbols, env, force=F) {
+         return(self$get.symbols(symbols, env, force))
       },
       
       store.symbol = function(symbol, data) {

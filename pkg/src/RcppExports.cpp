@@ -47,6 +47,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// zigZagInterface
+Rcpp::List zigZagInterface(SEXP pricesIn, SEXP changesIn, bool percent);
+RcppExport SEXP btutils_zigZagInterface(SEXP pricesInSEXP, SEXP changesInSEXP, SEXP percentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type pricesIn(pricesInSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type changesIn(changesInSEXP);
+    Rcpp::traits::input_parameter< bool >::type percent(percentSEXP);
+    __result = Rcpp::wrap(zigZagInterface(pricesIn, changesIn, percent));
+    return __result;
+END_RCPP
+}
 // processTradeInterface
 Rcpp::List processTradeInterface(SEXP opIn, SEXP hiIn, SEXP loIn, SEXP clIn, int ibeg, int iend, int pos, double stopLoss, double stopTrailing, double profitTarget, int maxDays, double tickSize);
 RcppExport SEXP btutils_processTradeInterface(SEXP opInSEXP, SEXP hiInSEXP, SEXP loInSEXP, SEXP clInSEXP, SEXP ibegSEXP, SEXP iendSEXP, SEXP posSEXP, SEXP stopLossSEXP, SEXP stopTrailingSEXP, SEXP profitTargetSEXP, SEXP maxDaysSEXP, SEXP tickSizeSEXP) {

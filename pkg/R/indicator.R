@@ -45,3 +45,22 @@ indicator.from.trendline = function(trendline, thresholds) {
 
    return(reclass(indicator.from.trendline.interface(trendline, thresholds), trendline))
 }
+
+zig.zag = function(prices, changes, percent=T) {
+   return(reclass(data.frame(zig.zag.interface(prices,changes,percent)),prices))
+}
+
+returns.rsi = function(returns, n=14) {
+   up = returns
+   which.dn = which(up < 0)
+   dn = up*0
+   dn[which.dn] = -up[which.dn]
+   up[which.dn] = 0
+   
+   mavg.up = runMean(up, n=n)
+   mavg.dn = runMean(dn, n=n)
+   
+   rsi = 100*mavg.up/(mavg.up + mavg.dn)
+   
+   return(reclass(rsi,returns))
+}

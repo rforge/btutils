@@ -241,3 +241,179 @@ Rcpp::NumericVector indicatorFromTrendlineInterface(SEXP trendlineIn, SEXP thres
 
    return Rcpp::NumericVector(indicator.begin(), indicator.end());
 }
+
+void zigZag(
+         const std::vector<double> & close,
+         const std::vector<double> & changes,
+         bool percent,
+         std::vector<int> & indicator,
+         std::vector<double> & inflections,
+         std::vector<double> & targets,
+         std::vector<double> & corrections,
+         std::vector<int> & age)
+{
+   int len = close.size();
+   
+   indicator.resize(len, 0);
+   inflections.resize(len, NA_REAL);
+   corrections.resize(len, 0);
+   targets.resize(len, NA_REAL);
+   age.resize(len, 0);
+   
+   int ii = 0;
+   // Skip all NAs in the changes vector
+   while(ii < len && isNA(changes[ii])) ++ii;
+   
+   if(ii >= len) return;
+   
+   int state = 0;
+   int jj = ii;
+   double target = changes[jj];
+   
+   // Find the first up or down state
+   for(++ii; ii < len; ++ii) {
+      if(percent) {
+         double pct = close[ii]/close[jj] - 1.0;
+         if(pct > target) {
+            state = 1;
+            break;
+         }
+         
+         pct = 1.0 - close[ii]/close[jj];
+         if(pct > target) {
+            state = -1;
+            break;
+         }
+      } else {
+         double cash = close[ii] - close[jj];
+         if(cash > target) {
+            state = 1;
+            break;
+         }
+         
+         cash = close[jj] - close[ii];
+         if(cash > target) {
+            state = -1;
+            break;
+         }
+      }
+   }
+   
+   if(ii < len) {
+      jj = ii;
+      target = changes[jj];
+      inflections[ii] = close[ii];
+      indicator[ii] = state;
+      targets[ii] = target;
+   }
+   
+   // The main loop
+   for(++ii; ii < len; ++ii) {
+      if(state == 1) {
+         if(close[ii] >= close[jj]) {
+            indicator[ii] = 1;
+            age[ii] = age[ii-1] + 1;
+            inflections[ii] = inflections[ii-1];
+            targets[ii] = targets[ii-1];
+            jj = ii;
+         } else {
+            bool newTrend = false;
+            double change;
+            if(percent) {
+               change = 1.0 - close[ii]/close[jj];
+               if(change > target) {
+                  newTrend = true;
+               }
+            } else {
+               change = close[jj] - close[ii];
+               if(change > target) {
+                  newTrend = true;
+               }
+            }
+            
+            if(newTrend) {
+               // Change in state
+               for(int kk = jj + 1; kk < ii; ++kk) {
+                  indicator[kk] = 1;
+               }
+               indicator[ii] = -1;
+               age[ii] = 0;
+               inflections[ii] = close[ii];
+               state = -1;
+               jj = ii;
+               targets[ii] = target = changes[jj];
+            } else {
+               indicator[ii] = 1;
+               age[ii] = age[ii-1] + 1;
+               inflections[ii] = inflections[ii-1];
+               corrections[ii] = change;
+               targets[ii] = targets[ii-1];
+            }
+         }
+      } else {
+         if(close[ii] <= close[jj]) {
+            indicator[ii] = -1;
+            age[ii] = age[ii-1] + 1;
+            inflections[ii] = inflections[ii-1];
+            targets[ii] = targets[ii-1];
+            jj = ii;
+         } else {
+            bool newTrend = false;
+            double change;
+            if(percent) {
+               change = close[ii]/close[jj] - 1.0;
+               if(change > target) {
+                  newTrend = true;
+               }
+            } else {
+               change = close[ii] - close[jj];
+               if(change > target) {
+                  newTrend = true;
+               }
+            }
+            
+            if(newTrend) {
+               // Change in state
+               for(int kk = jj + 1; kk < ii; ++kk) {
+                  indicator[kk] = -1;
+               }
+               indicator[ii] = 1;
+               age[ii] = 0;
+               inflections[ii] = close[ii];
+               state = 1;
+               jj = ii;
+               target = changes[jj];
+               targets[ii] = target;
+            } else {
+               indicator[ii] = -1;
+               age[ii] = age[ii-1] + 1;
+               inflections[ii] = inflections[ii-1];
+               corrections[ii] = change;
+               targets[ii] = targets[ii-1];
+            }
+         }
+      }
+   }
+}
+
+// [[Rcpp::export("zig.zag.interface")]]
+Rcpp::List zigZagInterface(SEXP pricesIn, SEXP changesIn, bool percent)
+{
+   std::vector<double> prices = Rcpp::as<std::vector<double> >(pricesIn);
+   std::vector<double> changes = Rcpp::as<std::vector<double> >(changesIn);
+   
+   std::vector<int> indicator;
+   std::vector<double> inflections;
+   std::vector<double> corrections;
+   std::vector<double> targets;
+   std::vector<int> age;
+   
+   zigZag(prices, changes, percent, indicator, inflections, targets, corrections, age);
+   
+   return Rcpp::List::create(
+               Rcpp::Named("indicator") = Rcpp::IntegerVector(indicator.begin(), indicator.end()),
+               Rcpp::Named("inflections") = Rcpp::NumericVector(inflections.begin(), inflections.end()),
+               Rcpp::Named("targets") = Rcpp::NumericVector(targets.begin(), targets.end()),
+               Rcpp::Named("corrections") = Rcpp::NumericVector(corrections.begin(), corrections.end()),
+               Rcpp::Named("age") = Rcpp::IntegerVector(age.begin(), age.end()));
+}

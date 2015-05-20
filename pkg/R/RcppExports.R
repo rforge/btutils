@@ -13,6 +13,10 @@ indicator.from.trendline.interface <- function(trendlineIn, thresholdsIn) {
     .Call('btutils_indicatorFromTrendlineInterface', PACKAGE = 'btutils', trendlineIn, thresholdsIn)
 }
 
+zig.zag.interface <- function(pricesIn, changesIn, percent) {
+    .Call('btutils_zigZagInterface', PACKAGE = 'btutils', pricesIn, changesIn, percent)
+}
+
 process.trade.interface <- function(opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize) {
     .Call('btutils_processTradeInterface', PACKAGE = 'btutils', opIn, hiIn, loIn, clIn, ibeg, iend, pos, stopLoss, stopTrailing, profitTarget, maxDays, tickSize)
 }
