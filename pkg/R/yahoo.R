@@ -87,6 +87,7 @@ YahooDb = R6Class("YahooDb",
          if(!force) {
             # Try the local cache first
             for(ss in db.names) {
+               print(ss)
                rs = dbGetQuery(
                   connection,
                   paste(
@@ -166,7 +167,7 @@ YahooDb = R6Class("YahooDb",
          driver = SQLite()
          connection = dbConnect(driver, dbname=private$path)
          
-         df = cbind(data.frame(symbol=symbol), index(data), data.frame(data))
+         df = cbind(data.frame(symbol=symbol), as.character(index(data)), data.frame(data))
          colnames(df) = c("symbol","date",private$col.names)
          dbBegin(connection)
          query = paste("delete from bars where symbol='", symbol, "'", sep="")
