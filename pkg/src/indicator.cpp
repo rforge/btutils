@@ -314,7 +314,8 @@ void zigZag(
             indicator[ii] = 1;
             age[ii] = age[ii-1] + 1;
             inflections[ii] = inflections[ii-1];
-            targets[ii] = targets[ii-1];
+            target = changes[ii];
+            targets[ii] = changes[ii];
             jj = ii;
          } else {
             bool newTrend = false;
@@ -341,7 +342,8 @@ void zigZag(
                inflections[ii] = close[ii];
                state = -1;
                jj = ii;
-               targets[ii] = target = changes[jj];
+               targets[ii] = changes[jj];
+               target = changes[jj];
             } else {
                indicator[ii] = 1;
                age[ii] = age[ii-1] + 1;
@@ -355,7 +357,8 @@ void zigZag(
             indicator[ii] = -1;
             age[ii] = age[ii-1] + 1;
             inflections[ii] = inflections[ii-1];
-            targets[ii] = targets[ii-1];
+            target = changes[ii];
+            targets[ii] = changes[ii];
             jj = ii;
          } else {
             bool newTrend = false;
